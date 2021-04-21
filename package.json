@@ -9,6 +9,7 @@
   "author": "Razvan Negrea <howl@wolfpilot.co> (www.wolfpilot.co)",
   "license": "MIT",
   "scripts": {
+    "prepare": "husky install",
     "start": "nodemon -r esm src/server/index.ts",
     "build": "tsc -p ./",
     "test": "jest",
@@ -23,6 +24,7 @@
     "@types/express": "^4.17.11",
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.41",
+    "husky": "^6.0.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",
     "ts-jest": "^26.5.5",
