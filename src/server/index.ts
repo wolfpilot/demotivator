@@ -1,3 +1,6 @@
+import dotenvFlow from "dotenv-flow"
+dotenvFlow.config()
+
 import express from "express"
 
 const app = express()
