@@ -3,7 +3,19 @@ dotenvFlow.config()
 
 import express from "express"
 
+// Config
+import { client } from "../utils/dbHelper"
+
 const app = express()
+
+client.connect((err) => {
+  if (err) throw new Error(err.message)
+})
+
+client
+  .query("SELECT * FROM quotes;")
+  .then((res) => console.log(res.rows[0]))
+  .catch((e) => console.error(e.stack))
 
 app.get("/", (_req, res) => {
   res.send("Praise the sun! \\[T]/")
