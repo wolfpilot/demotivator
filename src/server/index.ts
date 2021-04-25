@@ -17,6 +17,8 @@ pool.connect((err) => {
 })
 
 // Express routes
+app.use(express.json())
+
 app.use("/quotes", quotesRoutes)
 
 app.get("/", (_req, res) => {
