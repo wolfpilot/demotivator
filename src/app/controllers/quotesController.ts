@@ -1,11 +1,14 @@
-import { Request, Response } from "express"
+import { Request } from "express"
 import { QueryResult } from "pg"
+
+// Types
+import { EHttpStatusCodes, IApiResponse } from "../../types/api"
 
 // Utils
 import { pool } from "../../utils/dbHelper"
 
 // Constants
-import { httpStatusCodes } from "../../constants/httpStatusCodes"
+import { httpStatusMessages } from "../../constants/http"
 
 export interface IQuoteData {
   id: number
@@ -18,11 +21,7 @@ export interface IQuotesListQueryResult<T = IQuoteData> extends QueryResult {
   rows: T[]
 }
 
-export type IQuotesListResponse = Response<{
-  success: boolean
-  data?: IQuoteData[]
-  error?: string
-}>
+export type IQuotesListResponse = IApiResponse<IQuoteData[]>
 
 // Get single quote by id
 export interface IQuotesGetByIdQueryResult<T = IQuoteData> extends QueryResult {
@@ -33,11 +32,7 @@ export type IQuotesGetByIdRequest = Request<{
   id: string
 }>
 
-export type IQuotesGetByIdResponse = Response<{
-  success: boolean
-  data?: IQuoteData
-  error?: string
-}>
+export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
 
 export const list = async (
   _req: Request,
@@ -59,7 +54,8 @@ export const list = async (
 
     return res.status(500).json({
       success: false,
-      error: err.message,
+      code: EHttpStatusCodes.InternalError,
+      message: err.message,
     })
   }
 }
@@ -73,7 +69,8 @@ export const getById = async (
   if (!id) {
     return res.status(400).json({
       success: false,
-      error: httpStatusCodes[400].required,
+      code: EHttpStatusCodes.Required,
+      message: httpStatusMessages[400].required,
     })
   }
 
@@ -82,14 +79,16 @@ export const getById = async (
   if (isNaN(idNum)) {
     return res.status(400).json({
       success: false,
-      error: httpStatusCodes[400].invalid,
+      code: EHttpStatusCodes.Invalid,
+      message: httpStatusMessages[400].invalid,
     })
   }
 
   if (idNum < 1) {
     return res.status(400).json({
       success: false,
-      error: httpStatusCodes[400].badRequest,
+      code: EHttpStatusCodes.BadRequest,
+      message: httpStatusMessages[400].badRequest,
     })
   }
 
@@ -102,7 +101,8 @@ export const getById = async (
     if (!data.rows || !data.rows.length) {
       return res.status(404).json({
         success: false,
-        error: httpStatusCodes[404].notFound,
+        code: EHttpStatusCodes.NotFound,
+        message: httpStatusMessages[404].notFound,
       })
     }
 
@@ -117,7 +117,8 @@ export const getById = async (
 
     return res.status(500).json({
       success: false,
-      error: err.message,
+      code: EHttpStatusCodes.InternalError,
+      message: err.message,
     })
   }
 }
