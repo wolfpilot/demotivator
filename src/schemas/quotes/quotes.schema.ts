@@ -10,3 +10,17 @@ export const quotesGetByIdSchema: JSONSchema7 = {
     },
   },
 }
+
+export const quotesCreateSchema: JSONSchema7 = {
+  type: "object",
+  required: ["text"],
+  properties: {
+    author: {
+      type: "string",
+      maxLength: 128,
+    },
+    text: {
+      type: "string",
+    },
+  },
+}

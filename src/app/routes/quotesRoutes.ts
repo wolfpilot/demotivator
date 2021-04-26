@@ -4,7 +4,10 @@ import express from "express"
 import * as controller from "../controllers/quotesController"
 
 // Schemas
-import { quotesGetByIdSchema } from "../../schemas/quotes/quotes.schema"
+import {
+  quotesGetByIdSchema,
+  quotesCreateSchema,
+} from "../../schemas/quotes/quotes.schema"
 
 // Utils
 import { validate } from "../../utils/validationHelper"
@@ -12,7 +15,7 @@ import { validate } from "../../utils/validationHelper"
 const router = express.Router()
 
 router.get("/", controller.list)
-// router.post("/", controller.create)
+router.post("/", validate({ body: quotesCreateSchema }), controller.create)
 router.get(
   "/:id",
   validate({ params: quotesGetByIdSchema }),

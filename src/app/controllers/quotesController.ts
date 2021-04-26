@@ -2,7 +2,12 @@ import { Request } from "express"
 import { QueryResult } from "pg"
 
 // Types
-import { EHttpStatusCodes, IApiResponse } from "../../types/api"
+import {
+  EHttpStatusCodes,
+  Params,
+  ResBody,
+  IApiResponse,
+} from "../../types/api"
 
 // Utils
 import { pool } from "../../utils/dbHelper"
@@ -22,6 +27,24 @@ export interface IQuotesListQueryResult<T = IQuoteData> extends QueryResult {
 }
 
 export type IQuotesListResponse = IApiResponse<IQuoteData[]>
+
+// Create single quote
+export interface IQuotesCreateQueryResult extends QueryResult {
+  rows: {
+    id: number
+  }[]
+}
+
+type IQuotesCreateRequest = Request<
+  Params,
+  ResBody,
+  {
+    author?: string
+    text: string
+  }
+>
+
+export type IQuotesCreateResponse = IApiResponse<string>
 
 // Get single quote by id
 export interface IQuotesGetByIdQueryResult<T = IQuoteData> extends QueryResult {
@@ -48,6 +71,37 @@ export const list = async (
     return res.status(200).json({
       success: true,
       data: data.rows,
+    })
+  } catch (err) {
+    console.error(err.message, err.stack)
+
+    return res.status(500).json({
+      success: false,
+      code: EHttpStatusCodes.InternalError,
+      message: err.message,
+    })
+  }
+}
+
+export const create = async (
+  req: IQuotesCreateRequest,
+  res: IQuotesCreateResponse
+): Promise<IQuotesCreateResponse> => {
+  const { author, text } = req.body
+
+  try {
+    const data: IQuotesCreateQueryResult = await pool.query(
+      `
+      INSERT INTO quotes (author, text)
+      VALUES ($1, $2)
+      RETURNING id;
+      `,
+      [author, text]
+    )
+
+    return res.status(201).json({
+      success: true,
+      message: `Quote added with ID ${data.rows[0].id}`,
     })
   } catch (err) {
     console.error(err.message, err.stack)
