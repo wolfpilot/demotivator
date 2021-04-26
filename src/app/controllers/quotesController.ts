@@ -2,12 +2,7 @@ import { Request } from "express"
 import { QueryResult } from "pg"
 
 // Types
-import {
-  EHttpStatusCodes,
-  Params,
-  ResBody,
-  IApiResponse,
-} from "../../types/api"
+import { HttpStatusCodes, Params, ResBody, IApiResponse } from "../../types/api"
 
 // Utils
 import { pool } from "../../utils/dbHelper"
@@ -77,7 +72,7 @@ export const list = async (
 
     return res.status(500).json({
       success: false,
-      code: EHttpStatusCodes.InternalError,
+      code: HttpStatusCodes.InternalError,
       message: err.message,
     })
   }
@@ -108,7 +103,7 @@ export const create = async (
 
     return res.status(500).json({
       success: false,
-      code: EHttpStatusCodes.InternalError,
+      code: HttpStatusCodes.InternalError,
       message: err.message,
     })
   }
@@ -126,7 +121,7 @@ export const getById = async (
   if (idNum < 1) {
     return res.status(400).json({
       success: false,
-      code: EHttpStatusCodes.BadRequest,
+      code: HttpStatusCodes.BadRequest,
       message: httpStatusMessages[400].badRequest,
     })
   }
@@ -143,7 +138,7 @@ export const getById = async (
     if (!data.rows || !data.rows.length) {
       return res.status(404).json({
         success: false,
-        code: EHttpStatusCodes.NotFound,
+        code: HttpStatusCodes.NotFound,
         message: httpStatusMessages[404].notFound,
       })
     }
@@ -157,7 +152,7 @@ export const getById = async (
 
     return res.status(500).json({
       success: false,
-      code: EHttpStatusCodes.InternalError,
+      code: HttpStatusCodes.InternalError,
       message: err.message,
     })
   }

@@ -1,7 +1,7 @@
 import * as core from "express-serve-static-core"
 import { Response } from "express"
 
-export enum EHttpStatusCodes {
+export enum HttpStatusCodes {
   BadRequest = "badRequest",
   Invalid = "invalid",
   ParseError = "parseError",
@@ -42,7 +42,7 @@ export interface IApiSuccess<T> {
 
 export interface IApiError {
   success: boolean
-  code: EHttpStatusCodes
+  code: HttpStatusCodes
   message: string
 }
 
