@@ -40,15 +40,15 @@ export const list = async (
 ): Promise<IQuotesListResponse> => {
   try {
     const data: IQuotesListQueryResult = await pool.query(
-      "SELECT * FROM quotes;"
+      `
+      SELECT * FROM quotes;
+      `
     )
 
-    const payload = {
+    return res.status(200).json({
       success: true,
       data: data.rows,
-    }
-
-    return res.status(200).json(payload)
+    })
   } catch (err) {
     console.error(err.message, err.stack)
 
@@ -66,23 +66,8 @@ export const getById = async (
 ): Promise<IQuotesGetByIdResponse> => {
   const { id } = req.params
 
-  if (!id) {
-    return res.status(400).json({
-      success: false,
-      code: EHttpStatusCodes.Required,
-      message: httpStatusMessages[400].required,
-    })
-  }
-
+  // TODO: How to coerce to number using validator middleware?
   const idNum = parseInt(id, 10)
-
-  if (isNaN(idNum)) {
-    return res.status(400).json({
-      success: false,
-      code: EHttpStatusCodes.Invalid,
-      message: httpStatusMessages[400].invalid,
-    })
-  }
 
   if (idNum < 1) {
     return res.status(400).json({
@@ -92,11 +77,14 @@ export const getById = async (
     })
   }
 
-  const text = "SELECT * FROM quotes WHERE id = $1;"
-  const values = [id]
-
   try {
-    const data: IQuotesGetByIdQueryResult = await pool.query(text, values)
+    const data: IQuotesGetByIdQueryResult = await pool.query(
+      `
+      SELECT * FROM quotes
+      WHERE id = $1;
+      `,
+      [id]
+    )
 
     if (!data.rows || !data.rows.length) {
       return res.status(404).json({
@@ -106,12 +94,10 @@ export const getById = async (
       })
     }
 
-    const payload = {
+    return res.status(200).json({
       success: true,
       data: data.rows[0],
-    }
-
-    return res.status(200).json(payload)
+    })
   } catch (err) {
     console.error(err.message, err.stack)
 
