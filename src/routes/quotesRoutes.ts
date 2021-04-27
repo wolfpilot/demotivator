@@ -8,10 +8,10 @@ import {
   quotesGetByIdSchema,
   quotesCreateSchema,
   quotesDeleteByIdSchema,
-} from "../../schemas/quotes/quotes.schema"
+} from "../schemas/quotes/quotes.schema"
 
 // Utils
-import { validate } from "../../utils/validationHelper"
+import { validate } from "../utils/validationHelper"
 
 const router = express.Router()
 

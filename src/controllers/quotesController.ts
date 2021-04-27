@@ -2,13 +2,13 @@ import { Request } from "express"
 import { QueryResult } from "pg"
 
 // Types
-import { HttpStatusCodes, Params, ResBody, IApiResponse } from "../../types/api"
+import { HttpStatusCodes, Params, ResBody, IApiResponse } from "../types/api"
 
 // Utils
-import { pool } from "../../utils/dbHelper"
+import { pool } from "../utils/dbHelper"
 
 // Constants
-import { httpStatusMessages } from "../../constants/http"
+import { httpStatusMessages } from "../constants/http"
 
 export interface IQuoteData {
   id: number

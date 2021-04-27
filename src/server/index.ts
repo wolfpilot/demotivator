@@ -10,7 +10,7 @@ import { validationErrorMiddleware } from "../middleware/validation"
 import { pool } from "../utils/dbHelper"
 
 // Routes
-import quotesRoutes from "../app/routes/quotesRoutes"
+import quotesRoutes from "../routes/quotesRoutes"
 
 const app = express()
 
