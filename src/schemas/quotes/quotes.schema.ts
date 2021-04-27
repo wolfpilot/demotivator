@@ -24,3 +24,14 @@ export const quotesCreateSchema: JSONSchema7 = {
     },
   },
 }
+
+export const quotesDeleteByIdSchema: JSONSchema7 = {
+  type: "object",
+  required: ["id"],
+  properties: {
+    id: {
+      type: "string",
+      pattern: "^\\d+$",
+    },
+  },
+}

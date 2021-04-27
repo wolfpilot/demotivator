@@ -7,6 +7,7 @@ import * as controller from "../controllers/quotesController"
 import {
   quotesGetByIdSchema,
   quotesCreateSchema,
+  quotesDeleteByIdSchema,
 } from "../../schemas/quotes/quotes.schema"
 
 // Utils
@@ -21,6 +22,10 @@ router.get(
   validate({ params: quotesGetByIdSchema }),
   controller.getById
 )
-// router.delete("/:id", controller.deleteById)
+router.delete(
+  "/:id",
+  validate({ params: quotesDeleteByIdSchema }),
+  controller.deleteById
+)
 
 export default router

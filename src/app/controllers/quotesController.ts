@@ -52,6 +52,18 @@ export type IQuotesGetByIdRequest = Request<{
 
 export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
 
+// Delete single quote by id
+export interface IQuotesDeleteByIdQueryResult<T = IQuoteData>
+  extends QueryResult {
+  rows: T[]
+}
+
+export type IQuotesDeleteByIdRequest = Request<{
+  id: string
+}>
+
+export type IQuotesDeleteByIdResponse = IApiResponse<string>
+
 export const list = async (
   _req: Request,
   res: IQuotesListResponse
@@ -146,6 +158,56 @@ export const getById = async (
     return res.status(200).json({
       success: true,
       data: data.rows[0],
+    })
+  } catch (err) {
+    console.error(err.message, err.stack)
+
+    return res.status(500).json({
+      success: false,
+      code: HttpStatusCodes.InternalError,
+      message: err.message,
+    })
+  }
+}
+
+export const deleteById = async (
+  req: IQuotesDeleteByIdRequest,
+  res: IQuotesDeleteByIdResponse
+): Promise<IQuotesDeleteByIdResponse> => {
+  const { id } = req.params
+
+  // TODO: How to coerce to number using validator middleware?
+  const idNum = parseInt(id, 10)
+
+  if (idNum < 1) {
+    return res.status(400).json({
+      success: false,
+      code: HttpStatusCodes.BadRequest,
+      message: httpStatusMessages[400].badRequest,
+    })
+  }
+
+  try {
+    const data: IQuotesDeleteByIdQueryResult = await pool.query(
+      `
+      DELETE FROM quotes
+      WHERE id = $1
+      RETURNING *;
+      `,
+      [id]
+    )
+
+    if (!data.rowCount) {
+      return res.status(409).json({
+        success: false,
+        code: HttpStatusCodes.Conflict,
+        message: httpStatusMessages[409].conflict,
+      })
+    }
+
+    return res.status(204).json({
+      success: true,
+      message: `Quote deleted with ID ${id}`,
     })
   } catch (err) {
     console.error(err.message, err.stack)

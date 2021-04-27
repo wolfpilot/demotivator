@@ -2,12 +2,18 @@ import * as core from "express-serve-static-core"
 import { Response } from "express"
 
 export enum HttpStatusCodes {
+  // 400
   BadRequest = "badRequest",
   Invalid = "invalid",
   ParseError = "parseError",
   Required = "required",
   UnknownApi = "unknownApi",
+  // 404
   NotFound = "notFound",
+  // 409
+  Conflict = "conflict",
+  Duplicate = "duplicate",
+  // 500
   InternalError = "internalError",
 }
 

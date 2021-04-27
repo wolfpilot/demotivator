@@ -22,6 +22,12 @@ export const httpStatusMessages = {
     notFound:
       "The requested operation failed because a resource associated with the request could not be found.",
   }),
+  409: asStrings({
+    conflict:
+      "The API request cannot be completed because the requested operation would conflict with an existing item. For example, a request that tries to create a duplicate item would create a conflict, though duplicate items are typically identified with more specific errors.",
+    duplicate:
+      "The requested operation failed because it tried to create a resource that already exists.",
+  }),
   500: asStrings({
     internalError: "The request failed due to an internal error.",
   }),
