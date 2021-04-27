@@ -31,4 +31,9 @@ export const httpStatusMessages = {
   500: asStrings({
     internalError: "The request failed due to an internal error.",
   }),
+  503: asStrings({
+    backendError: "A backend error occurred.",
+    backendNotConnected: "The request failed due to a connection error.",
+    notReady: "The API server is not ready to accept requests.",
+  }),
 }

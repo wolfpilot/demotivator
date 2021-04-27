@@ -1,35 +1,17 @@
 import { Request } from "express"
-import { QueryResult } from "pg"
 
 // Types
+import { isApiError } from "../types/typeGuards"
 import { HttpStatusCodes, Params, ResBody, IApiResponse } from "../types/api"
-
-// Utils
-import { pool } from "../utils/dbHelper"
+import { IQuoteData } from "../types/data/quotes"
 
 // Constants
 import { httpStatusMessages } from "../constants/http"
 
-export interface IQuoteData {
-  id: number
-  author?: string
-  text: string
-}
+// Models
+import * as Quotes from "../models/quotes"
 
-// List all quotes
-export interface IQuotesListQueryResult<T = IQuoteData> extends QueryResult {
-  rows: T[]
-}
-
-export type IQuotesListResponse = IApiResponse<IQuoteData[]>
-
-// Create single quote
-export interface IQuotesCreateQueryResult extends QueryResult {
-  rows: {
-    id: number
-  }[]
-}
-
+// Requests
 type IQuotesCreateRequest = Request<
   Params,
   ResBody,
@@ -39,29 +21,18 @@ type IQuotesCreateRequest = Request<
   }
 >
 
-export type IQuotesCreateResponse = IApiResponse<string>
-
-// Get single quote by id
-export interface IQuotesGetByIdQueryResult<T = IQuoteData> extends QueryResult {
-  rows: T[]
-}
-
 export type IQuotesGetByIdRequest = Request<{
   id: string
 }>
-
-export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
-
-// Delete single quote by id
-export interface IQuotesDeleteByIdQueryResult<T = IQuoteData>
-  extends QueryResult {
-  rows: T[]
-}
 
 export type IQuotesDeleteByIdRequest = Request<{
   id: string
 }>
 
+// Responses
+export type IQuotesListResponse = IApiResponse<IQuoteData[]>
+export type IQuotesCreateResponse = IApiResponse<string>
+export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
 export type IQuotesDeleteByIdResponse = IApiResponse<string>
 
 export const list = async (
@@ -69,23 +40,23 @@ export const list = async (
   res: IQuotesListResponse
 ): Promise<IQuotesListResponse> => {
   try {
-    const data: IQuotesListQueryResult = await pool.query(
-      `
-      SELECT * FROM quotes;
-      `
-    )
+    const payload = await Quotes.list()
+
+    if (isApiError(payload)) {
+      throw new Error("Could not list quotes.")
+    }
 
     return res.status(200).json({
       success: true,
-      data: data.rows,
+      status: 200,
+      data: payload.data,
     })
   } catch (err) {
-    console.error(err.message, err.stack)
-
     return res.status(500).json({
       success: false,
+      status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message,
+      message: err.message || httpStatusMessages[500].internalError,
     })
   }
 }
@@ -97,26 +68,30 @@ export const create = async (
   const { author, text } = req.body
 
   try {
-    const data: IQuotesCreateQueryResult = await pool.query(
-      `
-      INSERT INTO quotes (author, text)
-      VALUES ($1, $2)
-      RETURNING id;
-      `,
-      [author, text]
-    )
+    const payload = await Quotes.create({
+      author,
+      text,
+    })
+
+    if (isApiError(payload)) {
+      throw new Error("Could not create quote.")
+    }
 
     return res.status(201).json({
       success: true,
-      message: `Quote added with ID ${data.rows[0].id}`,
+      status: 201,
+      message: `Quote added with ID ${payload.data}`,
     })
   } catch (err) {
-    console.error(err.message, err.stack)
+    if (err.code && err.message) {
+      return res.status(err.status || 500).json(err)
+    }
 
     return res.status(500).json({
       success: false,
+      status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message,
+      message: err.message || httpStatusMessages[500].internalError,
     })
   }
 }
@@ -127,45 +102,39 @@ export const getById = async (
 ): Promise<IQuotesGetByIdResponse> => {
   const { id } = req.params
 
-  // TODO: How to coerce to number using validator middleware?
-  const idNum = parseInt(id, 10)
-
-  if (idNum < 1) {
-    return res.status(400).json({
-      success: false,
-      code: HttpStatusCodes.BadRequest,
-      message: httpStatusMessages[400].badRequest,
-    })
-  }
-
   try {
-    const data: IQuotesGetByIdQueryResult = await pool.query(
-      `
-      SELECT * FROM quotes
-      WHERE id = $1;
-      `,
-      [id]
-    )
+    const payload = await Quotes.getById({
+      id,
+    })
 
-    if (!data.rows || !data.rows.length) {
+    if (!payload) {
       return res.status(404).json({
         success: false,
+        status: 404,
         code: HttpStatusCodes.NotFound,
         message: httpStatusMessages[404].notFound,
       })
     }
 
+    if (isApiError(payload)) {
+      throw new Error("Could not get quote by id.")
+    }
+
     return res.status(200).json({
       success: true,
-      data: data.rows[0],
+      status: 200,
+      data: payload.data,
     })
   } catch (err) {
-    console.error(err.message, err.stack)
+    if (err.code && err.message) {
+      return res.status(err.status || 500).json(err)
+    }
 
     return res.status(500).json({
       success: false,
+      status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message,
+      message: err.message || httpStatusMessages[500].internalError,
     })
   }
 }
@@ -176,46 +145,30 @@ export const deleteById = async (
 ): Promise<IQuotesDeleteByIdResponse> => {
   const { id } = req.params
 
-  // TODO: How to coerce to number using validator middleware?
-  const idNum = parseInt(id, 10)
-
-  if (idNum < 1) {
-    return res.status(400).json({
-      success: false,
-      code: HttpStatusCodes.BadRequest,
-      message: httpStatusMessages[400].badRequest,
-    })
-  }
-
   try {
-    const data: IQuotesDeleteByIdQueryResult = await pool.query(
-      `
-      DELETE FROM quotes
-      WHERE id = $1
-      RETURNING *;
-      `,
-      [id]
-    )
+    const payload = await Quotes.deleteById({
+      id,
+    })
 
-    if (!data.rowCount) {
-      return res.status(409).json({
-        success: false,
-        code: HttpStatusCodes.Conflict,
-        message: httpStatusMessages[409].conflict,
-      })
+    if (isApiError(payload)) {
+      throw new Error("Could not delete quote.")
     }
 
     return res.status(204).json({
       success: true,
+      status: 204,
       message: `Quote deleted with ID ${id}`,
     })
   } catch (err) {
-    console.error(err.message, err.stack)
+    if (err.code && err.message) {
+      return res.status(err.status || 500).json(err)
+    }
 
     return res.status(500).json({
       success: false,
+      status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message,
+      message: err.message || httpStatusMessages[500].internalError,
     })
   }
 }
