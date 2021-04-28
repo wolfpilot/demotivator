@@ -1,5 +1,7 @@
 import dotenvFlow from "dotenv-flow"
-dotenvFlow.config()
+dotenvFlow.config({
+  node_env: process.env.NODE_ENV || "development",
+})
 
 import express from "express"
 
