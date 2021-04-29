@@ -7,6 +7,7 @@ export const quotesGetByIdSchema: JSONSchema7 = {
     id: {
       type: "string",
       pattern: "^\\d+$",
+      minLength: 1,
     },
   },
 }
@@ -21,6 +22,7 @@ export const quotesCreateSchema: JSONSchema7 = {
     },
     text: {
       type: "string",
+      minLength: 1,
     },
   },
 }
@@ -32,6 +34,7 @@ export const quotesDeleteByIdSchema: JSONSchema7 = {
     id: {
       type: "string",
       pattern: "^\\d+$",
+      minLength: 1,
     },
   },
 }
