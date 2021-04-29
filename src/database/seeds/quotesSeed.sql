@@ -33,3 +33,6 @@ VALUES (9, 'Dorothy Parker', 'If you want to know what God thinks of money, just
 
 INSERT INTO quotes (id, author, text)
 VALUES (10, 'Harry Hill', 'It''s only when you look at an ant through a magnifying glass on a sunny day that you realize how often they burst into flames.');
+
+-- Set the sequence ID to the last index of quotes rows
+SELECT SETVAL('quotes_id_seq', (SELECT MAX(id) from "quotes"));
