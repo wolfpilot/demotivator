@@ -48,7 +48,6 @@ afterAll(async () => {
 describe("GET /quotes", () => {
   it("should list all the quotes", async () => {
     const res = await req(app).get("/quotes")
-
     expect(res.status).toBe(200)
     expect(res.body.data).toEqual(quotesMock)
   })
@@ -63,13 +62,11 @@ describe("POST /quotes", () => {
     }
 
     const resQuotesCreate = await req(app).post("/quotes").send(mockData)
-
     expect(resQuotesCreate.status).toBe(201)
 
     const resQuotesGetById = await req(app).get(
       `/quotes/${resQuotesCreate.body.data.id}`
     )
-
     expect(resQuotesGetById.status).toBe(200)
     expect(resQuotesGetById.body.data.author).toEqual(mockData.author)
     expect(resQuotesGetById.body.data.text).toEqual(mockData.text)
@@ -83,13 +80,11 @@ describe("POST /quotes", () => {
     }
 
     const resQuotesCreate = await req(app).post("/quotes").send(mockData)
-
     expect(resQuotesCreate.status).toBe(201)
 
     const resQuotesGetById = await req(app).get(
       `/quotes/${resQuotesCreate.body.data.id}`
     )
-
     expect(resQuotesGetById.status).toBe(200)
     expect(resQuotesGetById.body.data.author).toEqual(mockData.author)
     expect(resQuotesGetById.body.data.text).toEqual(mockData.text)
@@ -102,7 +97,6 @@ describe("POST /quotes", () => {
     }
 
     const resQuotesCreate = await req(app).post("/quotes").send(mockData)
-
     expect(resQuotesCreate.status).toBe(400)
   })
 })
@@ -110,38 +104,55 @@ describe("POST /quotes", () => {
 describe("GET /quotes:id", () => {
   it("should retrieve a single quote with a populated id", async () => {
     const res = await req(app).get("/quotes/1")
-
     expect(res.status).toBe(200)
     expect(res.body.data).toEqual(quotesMock[0])
   })
 
   it("should fail retrieving a quote with non-existent ids", async () => {
     const res1 = await req(app).get("/quotes/11")
-
     expect(res1.status).toBe(404)
 
     const res2 = await req(app).get("/quotes/999")
-
     expect(res2.status).toBe(404)
   })
 
   it("should fail retrieving a quote with an id lower than 1", async () => {
     const res1 = await req(app).get("/quotes/0")
-
     expect(res1.status).toBe(400)
 
     const res2 = await req(app).get("/quotes/-5")
-
     expect(res2.status).toBe(400)
   })
 
   it("should fail retrieving a quote when id is not a number", async () => {
     const res1 = await req(app).get("/quotes/abc")
-
     expect(res1.status).toBe(400)
 
     const res2 = await req(app).get("/quotes/123abc456")
-
     expect(res2.status).toBe(400)
+  })
+})
+
+describe("DELETE /quotes:id", () => {
+  it("should delete the specified quote if it exists", async () => {
+    const res = await req(app).delete("/quotes/5")
+    expect(res.status).toBe(204)
+  })
+
+  it("should fail deleting non-existend quotes", async () => {
+    const res1 = await req(app).delete("/quotes/0")
+    expect(res1.status).toBe(400)
+
+    const res2 = await req(app).delete("/quotes/-5")
+    expect(res2.status).toBe(400)
+
+    const res3 = await req(app).delete("/quotes/999")
+    expect(res3.status).toBe(404)
+
+    const res4 = await req(app).delete("/quotes/abc")
+    expect(res4.status).toBe(400)
+
+    const res5 = await req(app).delete("/quotes/123abc456")
+    expect(res5.status).toBe(400)
   })
 })
