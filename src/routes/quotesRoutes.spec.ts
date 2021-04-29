@@ -106,3 +106,42 @@ describe("POST /quotes", () => {
     expect(resQuotesCreate.status).toBe(400)
   })
 })
+
+describe("GET /quotes:id", () => {
+  it("should retrieve a single quote with a populated id", async () => {
+    const res = await req(app).get("/quotes/1")
+
+    expect(res.status).toBe(200)
+    expect(res.body.data).toEqual(quotesMock[0])
+  })
+
+  it("should fail retrieving a quote with non-existent ids", async () => {
+    const res1 = await req(app).get("/quotes/11")
+
+    expect(res1.status).toBe(404)
+
+    const res2 = await req(app).get("/quotes/999")
+
+    expect(res2.status).toBe(404)
+  })
+
+  it("should fail retrieving a quote with an id lower than 1", async () => {
+    const res1 = await req(app).get("/quotes/0")
+
+    expect(res1.status).toBe(400)
+
+    const res2 = await req(app).get("/quotes/-5")
+
+    expect(res2.status).toBe(400)
+  })
+
+  it("should fail retrieving a quote when id is not a number", async () => {
+    const res1 = await req(app).get("/quotes/abc")
+
+    expect(res1.status).toBe(400)
+
+    const res2 = await req(app).get("/quotes/123abc456")
+
+    expect(res2.status).toBe(400)
+  })
+})
