@@ -9,7 +9,7 @@ import { IQuoteData } from "../types/data/quotes"
 import { httpStatusMessages } from "../constants/http"
 
 // Models
-import * as Quotes from "../models/quotes"
+import * as QuotesModel from "../models/quotesModel"
 
 // Requests
 type IQuotesCreateRequest = Request<
@@ -31,7 +31,9 @@ export type IQuotesDeleteByIdRequest = Request<{
 
 // Responses
 export type IQuotesListResponse = IApiResponse<IQuoteData[]>
-export type IQuotesCreateResponse = IApiResponse<string>
+export type IQuotesCreateResponse = IApiResponse<{
+  id: string
+}>
 export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
 export type IQuotesDeleteByIdResponse = IApiResponse<string>
 
@@ -40,7 +42,7 @@ export const list = async (
   res: IQuotesListResponse
 ): Promise<IQuotesListResponse> => {
   try {
-    const payload = await Quotes.list()
+    const payload = await QuotesModel.list()
 
     if (isApiError(payload)) {
       throw new Error("Could not list quotes.")
@@ -52,6 +54,10 @@ export const list = async (
       data: payload.data,
     })
   } catch (err) {
+    if (err.code && err.message) {
+      return res.status(err.status || 500).json(err)
+    }
+
     return res.status(500).json({
       success: false,
       status: 500,
@@ -68,7 +74,7 @@ export const create = async (
   const { author, text } = req.body
 
   try {
-    const payload = await Quotes.create({
+    const payload = await QuotesModel.create({
       author,
       text,
     })
@@ -77,10 +83,15 @@ export const create = async (
       throw new Error("Could not create quote.")
     }
 
+    if (!payload.data) {
+      throw new Error(httpStatusMessages[500].internalError)
+    }
+
     return res.status(201).json({
       success: true,
       status: 201,
-      message: `Quote added with ID ${payload.data}`,
+      data: payload.data,
+      message: `Quote added with ID ${payload.data.id}`,
     })
   } catch (err) {
     if (err.code && err.message) {
@@ -103,7 +114,7 @@ export const getById = async (
   const { id } = req.params
 
   try {
-    const payload = await Quotes.getById({
+    const payload = await QuotesModel.getById({
       id,
     })
 
@@ -146,7 +157,7 @@ export const deleteById = async (
   const { id } = req.params
 
   try {
-    const payload = await Quotes.deleteById({
+    const payload = await QuotesModel.deleteById({
       id,
     })
 

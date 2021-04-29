@@ -1,6 +1,8 @@
+import { PoolConfig } from "pg"
+
 const { PG_USER, PG_HOST, PG_DATABASE, PG_PASSWORD, PG_PORT } = process.env
 
-export const config = {
+export const config: PoolConfig = {
   user: PG_USER,
   host: PG_HOST,
   database: PG_DATABASE,

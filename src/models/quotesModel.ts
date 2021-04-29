@@ -32,7 +32,9 @@ export interface IQuotesDeleteByIdQueryResult<T = IQuoteData>
 
 // Results
 export type IQuotesListResponse = IApiPromise<IQuoteData[]>
-export type IQuotesCreateResponse = IApiPromise<string>
+export type IQuotesCreateResponse = IApiPromise<{
+  id: string
+}>
 export type IQuotesGetByIdResponse = IApiPromise<IQuoteData>
 export type IQuotesDeleteByIdResponse = IApiPromise
 
@@ -92,7 +94,9 @@ export const create = async ({
     return Promise.resolve({
       success: true,
       status: 204,
-      data: id.toString(),
+      data: {
+        id: id.toString(),
+      },
     })
   } catch (err) {
     console.error(err.message, err.stack)
