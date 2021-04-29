@@ -31,7 +31,9 @@ export type IQuotesDeleteByIdRequest = Request<{
 
 // Responses
 export type IQuotesListResponse = IApiResponse<IQuoteData[]>
-export type IQuotesCreateResponse = IApiResponse<string>
+export type IQuotesCreateResponse = IApiResponse<{
+  id: string
+}>
 export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
 export type IQuotesDeleteByIdResponse = IApiResponse<string>
 
@@ -81,10 +83,15 @@ export const create = async (
       throw new Error("Could not create quote.")
     }
 
+    if (!payload.data) {
+      throw new Error(httpStatusMessages[500].internalError)
+    }
+
     return res.status(201).json({
       success: true,
       status: 201,
-      message: `Quote added with ID ${payload.data}`,
+      data: payload.data,
+      message: `Quote added with ID ${payload.data.id}`,
     })
   } catch (err) {
     if (err.code && err.message) {
