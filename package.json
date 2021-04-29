@@ -1,10 +1,10 @@
 {
-  "name": "demotivator",
+  "name": "demotivator-rest-api",
   "description": "Why do today what you can put off until tomorrow?",
   "version": "0.0.1",
   "private": true,
   "main": "src/server.js",
-  "repository": "https://github.com/wolfpilot/demotivator.git",
+  "repository": "https://github.com/wolfpilot/demotivator-rest-api.git",
   "author": "Razvan Negrea <howl@wolfpilot.co> (www.wolfpilot.co)",
   "license": "MIT",
   "scripts": {
