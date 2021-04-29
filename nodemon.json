@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "./coverage",
+    "./node_modules",
+    ".gitignore",
+    ".gitattributes"
+  ]
+}

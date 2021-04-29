@@ -1,0 +1,5 @@
+# Make .sql files indentifiable by Linguist
+# More info at:
+# https://github.com/github/linguist/issues/3666#issuecomment-424086369
+*.sql linguist-detectable=true
+*.sql linguist-language=sql
