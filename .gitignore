@@ -28,9 +28,6 @@ yarn-error.log*
 .env.local
 .env.*.local
 
-# Source
-/src/database
-
 # Output
 /coverage
 
