@@ -3,13 +3,13 @@ import fs from "fs"
 import path from "path"
 
 // Express
-import app from "../app"
+import app from "@src/app"
 
 // Data
-import { quotesMock } from "../mocks/quotesMock"
+import { quotesMock } from "@mocks/quotesMock"
 
 // Utils
-import { pool } from "../utils/dbHelper"
+import { pool } from "@utils/dbHelper"
 
 const sql = fs
   .readFileSync(path.resolve(__dirname, "../database/seeds/quotesSeed.sql"))

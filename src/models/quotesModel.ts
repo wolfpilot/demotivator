@@ -1,14 +1,14 @@
 import { QueryResult } from "pg"
 
 // Types
-import { HttpStatusCodes, IApiPromise } from "../types/api"
-import { IQuoteData } from "../types/data/quotes"
+import { HttpStatusCodes, IApiPromise } from "@ts/api"
+import { IQuoteData } from "@ts/data/quotes"
 
 // Utils
-import { pool } from "../utils/dbHelper"
+import { pool } from "@utils/dbHelper"
 
 // Constants
-import { httpStatusMessages } from "../constants/http"
+import { httpStatusMessages } from "@constants/http"
 
 // Queries
 export interface IQuotesListQueryResult<T = IQuoteData> extends QueryResult {

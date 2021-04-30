@@ -1,5 +1,5 @@
 // Server
-import app from "./app"
+import app from "@src/app"
 
 const { SERVER_PORT = 9000 } = process.env
 

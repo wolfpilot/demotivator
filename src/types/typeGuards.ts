@@ -1,5 +1,5 @@
 // Types
-import { IApiError } from "./api"
+import { IApiError } from "@ts/api"
 
 export const isApiError = (props: unknown | IApiError): props is IApiError =>
   // tslint:disable-next-line: strict-type-predicates

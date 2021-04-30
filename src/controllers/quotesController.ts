@@ -1,15 +1,15 @@
 import { Request } from "express"
 
 // Types
-import { isApiError } from "../types/typeGuards"
+import { isApiError } from "@ts/typeGuards"
 import { HttpStatusCodes, Params, ResBody, IApiResponse } from "../types/api"
-import { IQuoteData } from "../types/data/quotes"
+import { IQuoteData } from "@ts/data/quotes"
 
 // Constants
-import { httpStatusMessages } from "../constants/http"
+import { httpStatusMessages } from "@constants/http"
 
 // Models
-import * as QuotesModel from "../models/quotesModel"
+import * as QuotesModel from "@models/quotesModel"
 
 // Requests
 type IQuotesCreateRequest = Request<
