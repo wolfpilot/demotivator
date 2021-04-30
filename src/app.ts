@@ -1,9 +1,3 @@
-import "module-alias/register"
-import dotenvFlow from "dotenv-flow"
-dotenvFlow.config({
-  node_env: process.env.NODE_ENV || "development",
-})
-
 import express from "express"
 
 // Middleware

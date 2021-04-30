@@ -4,6 +4,7 @@ import { resolve } from "path"
 
 const config: Config.InitialOptions = {
   preset: "ts-jest",
+  setupFiles: ["dotenv-flow/config"],
   testEnvironment: "node",
   testMatch: ["<rootDir>/src/**/*.spec.ts"],
   testPathIgnorePatterns: ["/node_modules/"],
