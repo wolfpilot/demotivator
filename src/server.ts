@@ -1,5 +1,12 @@
+import "module-alias/register"
+import dotenvFlow from "dotenv-flow"
+
+dotenvFlow.config({
+  node_env: process.env.NODE_ENV || "development",
+})
+
 // Server
-import app from "./app"
+import app from "@src/app"
 
 const { SERVER_PORT = 9000 } = process.env
 

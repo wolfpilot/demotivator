@@ -1,15 +1,10 @@
-import dotenvFlow from "dotenv-flow"
-dotenvFlow.config({
-  node_env: process.env.NODE_ENV || "development",
-})
-
 import express from "express"
 
 // Middleware
-import { validationErrorMiddleware } from "./middleware/validation"
+import { validationErrorMiddleware } from "@middleware/validation"
 
 // Routes
-import quotesRoutes from "./routes/quotesRoutes"
+import quotesRoutes from "@routes/quotesRoutes"
 
 // Setup
 const app = express()

@@ -1,5 +1,5 @@
 // Utils
-import { asStrings } from "../utils/typeHelper"
+import { asStrings } from "@utils/typeHelper"
 
 /**
  * Shamelessly referenced from Google's Webmaster Tools v3
