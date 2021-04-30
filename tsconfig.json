@@ -9,6 +9,7 @@
       "dom.iterable",
       "scripthost"
     ],
+    "baseUrl": "./",
     "outDir": "./build/",
     "strict": true,
     "sourceMap": true,
@@ -25,6 +26,22 @@
     "noUnusedParameters": true,
     "removeComments": false,
     "preserveConstEnums": true,
+    "paths": {
+      "*": ["typings/*",],
+      "@root/*": ["./*"],
+      "@src/*": ["./src/*"],
+      "@config/*": ["src/config/*"],
+      "@constants/*": ["src/constants/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@database/*": ["src/database/*"],
+      "@middleware/*": ["src/middleware/*"],
+      "@mocks/*": ["src/mocks/*"],
+      "@models/*": ["src/models/*"],
+      "@routes/*": ["src/routes/*"],
+      "@schemas/*": ["src/schemas/*"],
+      "@ts/*": ["src/types/*"],
+      "@utils/*": ["src/utils/*"]
+    },
   },
   "exclude": [
     "node_modules"
