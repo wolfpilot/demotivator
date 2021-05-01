@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "start": "nodemon -r esm src/server.ts",
+    "start": "NODE_ENV=development nodemon -r esm src/server.ts",
     "build": "tsc -p ./",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
@@ -38,8 +38,10 @@
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "express-json-validator-middleware": "^2.1.1",
+    "express-winston": "^4.1.0",
     "module-alias": "^2.2.2",
-    "pg": "^8.6.0"
+    "pg": "^8.6.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/dotenv-flow": "^3.1.0",
