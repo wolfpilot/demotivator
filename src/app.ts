@@ -1,7 +1,7 @@
 import express from "express"
 
 // Middleware
-import { debugLogger, requestLogger } from "@middleware/logger"
+import { debugLogger, requestLogger, errorLogger } from "@middleware/logger"
 import { validationErrorMiddleware } from "@middleware/validation"
 
 // Routes
@@ -21,5 +21,6 @@ app.use("/quotes", quotesRoutes)
 
 // Error Middleware
 app.use(validationErrorMiddleware)
+app.use(errorLogger)
 
 export default app

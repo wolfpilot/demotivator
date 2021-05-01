@@ -71,3 +71,18 @@ export const requestLogger = expressWinston.logger({
   statusLevels: false,
   ignoreRoute: () => process.env.NODE_ENV === "test",
 })
+
+export const errorLogger = expressWinston.errorLogger({
+  ...baseLogger,
+  transports: [
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: StatusLevel.Error,
+    }),
+  ],
+  format: winston.format.combine(
+    winston.format.json(),
+    winston.format.prettyPrint()
+  ),
+  blacklistedMetaFields: ["exception"],
+})

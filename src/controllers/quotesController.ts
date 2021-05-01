@@ -1,4 +1,4 @@
-import { Request } from "express"
+import { Request, NextFunction } from "express"
 
 // Types
 import { isApiError } from "@ts/typeGuards"
@@ -39,7 +39,8 @@ export type IQuotesDeleteByIdResponse = IApiResponse<string>
 
 export const list = async (
   _req: Request,
-  res: IQuotesListResponse
+  res: IQuotesListResponse,
+  next: NextFunction
 ): Promise<IQuotesListResponse> => {
   try {
     const payload = await QuotesModel.list()
@@ -54,22 +55,27 @@ export const list = async (
       data: payload.data,
     })
   } catch (err) {
-    if (err.code && err.message) {
-      return res.status(err.status || 500).json(err)
+    if (err.status && err.code && err.message) {
+      next(new Error(err.message))
+
+      return res.status(err.status).json(err)
     }
+
+    next(new Error(httpStatusMessages[500].internalError))
 
     return res.status(500).json({
       success: false,
       status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message || httpStatusMessages[500].internalError,
+      message: httpStatusMessages[500].internalError,
     })
   }
 }
 
 export const create = async (
   req: IQuotesCreateRequest,
-  res: IQuotesCreateResponse
+  res: IQuotesCreateResponse,
+  next: NextFunction
 ): Promise<IQuotesCreateResponse> => {
   const { author, text } = req.body
 
@@ -94,22 +100,27 @@ export const create = async (
       message: `Quote added with ID ${payload.data.id}`,
     })
   } catch (err) {
-    if (err.code && err.message) {
-      return res.status(err.status || 500).json(err)
+    if (err.status && err.code && err.message) {
+      next(new Error(err.message))
+
+      return res.status(err.status).json(err)
     }
+
+    next(new Error(httpStatusMessages[500].internalError))
 
     return res.status(500).json({
       success: false,
       status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message || httpStatusMessages[500].internalError,
+      message: httpStatusMessages[500].internalError,
     })
   }
 }
 
 export const getById = async (
   req: IQuotesGetByIdRequest,
-  res: IQuotesGetByIdResponse
+  res: IQuotesGetByIdResponse,
+  next: NextFunction
 ): Promise<IQuotesGetByIdResponse> => {
   const { id } = req.params
 
@@ -137,22 +148,27 @@ export const getById = async (
       data: payload.data,
     })
   } catch (err) {
-    if (err.code && err.message) {
-      return res.status(err.status || 500).json(err)
+    if (err.status && err.code && err.message) {
+      next(new Error(err.message))
+
+      return res.status(err.status).json(err)
     }
+
+    next(new Error(httpStatusMessages[500].internalError))
 
     return res.status(500).json({
       success: false,
       status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message || httpStatusMessages[500].internalError,
+      message: httpStatusMessages[500].internalError,
     })
   }
 }
 
 export const deleteById = async (
   req: IQuotesDeleteByIdRequest,
-  res: IQuotesDeleteByIdResponse
+  res: IQuotesDeleteByIdResponse,
+  next: NextFunction
 ): Promise<IQuotesDeleteByIdResponse> => {
   const { id } = req.params
 
@@ -171,15 +187,19 @@ export const deleteById = async (
       message: `Quote deleted with ID ${id}`,
     })
   } catch (err) {
-    if (err.code && err.message) {
-      return res.status(err.status || 500).json(err)
+    if (err.status && err.code && err.message) {
+      next(new Error(err.message))
+
+      return res.status(err.status).json(err)
     }
+
+    next(new Error(httpStatusMessages[500].internalError))
 
     return res.status(500).json({
       success: false,
       status: 500,
       code: HttpStatusCodes.InternalError,
-      message: err.message || httpStatusMessages[500].internalError,
+      message: httpStatusMessages[500].internalError,
     })
   }
 }
