@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import expressWinston, { BaseLoggerOptions } from "express-winston"
 import winston from "winston"
+import DailyRotateFile from "winston-daily-rotate-file"
 
 export enum StatusLevel {
   Http = "http",
@@ -9,6 +10,19 @@ export enum StatusLevel {
   Warn = "warn",
   Error = "error",
   Critical = "critical",
+}
+
+// Setup
+const baseLoggerOptions: BaseLoggerOptions = {
+  msg:
+    "HTTP: {{req.method}} {{req.url}} {{res.statusCode}} {{res.responseTime}}ms",
+  level: (req, res) => getLevel(req, res),
+}
+
+const baseRotateFileOptions = {
+  zippedArchive: true,
+  maxSize: "20m",
+  maxFiles: "14d",
 }
 
 export const getLevel = (req: Request, res: Response): string => {
@@ -30,14 +44,8 @@ export const getLevel = (req: Request, res: Response): string => {
   }
 }
 
-const baseLogger: BaseLoggerOptions = {
-  msg:
-    "HTTP: {{req.method}} {{req.url}} {{res.statusCode}} {{res.responseTime}}ms",
-  level: (req, res) => getLevel(req, res),
-}
-
 export const debugLogger = expressWinston.logger({
-  ...baseLogger,
+  ...baseLoggerOptions,
   transports: [
     new winston.transports.Console({
       level: StatusLevel.Debug,
@@ -55,10 +63,12 @@ export const debugLogger = expressWinston.logger({
 })
 
 export const requestLogger = expressWinston.logger({
-  ...baseLogger,
+  ...baseLoggerOptions,
   transports: [
-    new winston.transports.File({
-      filename: "logs/combined.log",
+    new DailyRotateFile({
+      ...baseRotateFileOptions,
+      dirname: "logs/all/",
+      filename: "all-%DATE%.log",
     }),
   ],
   format: winston.format.combine(
@@ -73,10 +83,12 @@ export const requestLogger = expressWinston.logger({
 })
 
 export const errorLogger = expressWinston.errorLogger({
-  ...baseLogger,
+  ...baseLoggerOptions,
   transports: [
-    new winston.transports.File({
-      filename: "logs/error.log",
+    new DailyRotateFile({
+      ...baseRotateFileOptions,
+      dirname: "logs/error/",
+      filename: "error-%DATE%.log",
       level: StatusLevel.Error,
     }),
   ],
