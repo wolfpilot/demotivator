@@ -1,6 +1,7 @@
 import express from "express"
 
 // Middleware
+import { contentTypeValidator } from "@middleware/contentTypeValidator"
 import { errorValidator } from "@root/src/middleware/errorValidator"
 import { errorHandler } from "@middleware/errorHandler"
 import { debugLogger, requestLogger, errorLogger } from "@middleware/logger"
@@ -14,6 +15,11 @@ const app = express()
 // Logging middlware
 app.use(requestLogger)
 app.use(debugLogger)
+
+// Request validator
+app.put("/*", contentTypeValidator("application/json"))
+app.post("/*", contentTypeValidator("application/json"))
+app.patch("/*", contentTypeValidator("application/json"))
 
 // Body parser
 app.use(express.json())

@@ -28,6 +28,10 @@ export const httpStatusMessages = {
     duplicate:
       "The requested operation failed because it tried to create a resource that already exists.",
   }),
+  415: asStrings({
+    unsupportedMediaType:
+      "The content type of the request data or the content type of a part of a multipart request is not supported.",
+  }),
   500: asStrings({
     internalError: "The request failed due to an internal error.",
   }),
