@@ -9,7 +9,10 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "build": "tsc -p ./",
+    "clean": "yarn clean:build && yarn clean:pkgs",
+    "clean:build": "rm -rf ./build",
+    "clean:pkgs": "rm -rf ./node_modules",
+    "build": "yarn clean:build && tsc -p ./",
     "start:dev": "NODE_ENV=development ts-node-dev -r tsconfig-paths/register src/server.ts",
     "start:prod": "NODE_ENV=production node -r ts-node/register/transpile-only -r tsconfig-paths/register build/server.js",
     "test": "NODE_ENV=test jest",
