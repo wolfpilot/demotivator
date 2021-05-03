@@ -1,7 +1,7 @@
 import express from "express"
 
 // Middleware
-import { validationErrorMiddleware } from "@middleware/validation"
+import { errorValidator } from "@root/src/middleware/errorValidator"
 import { errorHandler } from "@middleware/errorHandler"
 import { debugLogger, requestLogger, errorLogger } from "@middleware/logger"
 
@@ -11,17 +11,18 @@ import quotesRoutes from "@routes/quotesRoutes"
 // Setup
 const app = express()
 
+// Logging middlware
+app.use(requestLogger)
+app.use(debugLogger)
+
 // Body parser
 app.use(express.json())
-
-app.use(debugLogger)
-app.use(requestLogger)
 
 // Routes
 app.use("/quotes", quotesRoutes)
 
-// Error Middleware
-app.use(validationErrorMiddleware)
+// Error middleware
+app.use(errorValidator)
 app.use(errorHandler)
 app.use(errorLogger)
 
