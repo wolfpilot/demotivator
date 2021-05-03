@@ -7,9 +7,9 @@ dotenvFlow.config({
 // Server
 import app from "@src/app"
 
-const { SERVER_PORT = 9000 } = process.env
+const { PORT = 9000 } = process.env
 
-app.listen(SERVER_PORT, () => {
+app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`Server listening on port ${SERVER_PORT}...`)
+  console.log(`Server listening on port ${PORT}...`)
 })
