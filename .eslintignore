@@ -4,5 +4,8 @@
 .cache/*
 coverage/*
 
+# Output
+build/*
+
 # MISC
 .husky/*
