@@ -52,6 +52,8 @@ export const list = async (): Promise<IQuotesListResponse> => {
       data: res.rows,
     })
   } catch (err) {
+    console.error(err.message, err.stack)
+
     return Promise.reject({
       success: false,
       status: 503,
@@ -97,6 +99,8 @@ export const create = async ({
       },
     })
   } catch (err) {
+    console.error(err.message, err.stack)
+
     return Promise.reject({
       success: false,
       status: 503,
@@ -146,6 +150,8 @@ export const getById = async ({
       data: res.rows[0],
     })
   } catch (err) {
+    console.error(err.message, err.stack)
+
     return Promise.reject({
       success: false,
       status: 503,
@@ -195,6 +201,8 @@ export const deleteById = async ({
       status: 204,
     })
   } catch (err) {
+    console.error(err.message, err.stack)
+
     return Promise.reject({
       success: false,
       status: 503,
