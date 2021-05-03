@@ -1,4 +1,3 @@
-import "module-alias/register"
 import dotenvFlow from "dotenv-flow"
 
 dotenvFlow.config({
