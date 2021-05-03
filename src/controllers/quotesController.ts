@@ -8,6 +8,9 @@ import { IQuoteData } from "@ts/data/quotes"
 // Constants
 import { httpStatusMessages } from "@constants/http"
 
+// Utils
+import { HttpError } from "@utils/errorHelper"
+
 // Models
 import * as QuotesModel from "@models/quotesModel"
 
@@ -46,7 +49,11 @@ export const list = async (
     const payload = await QuotesModel.list()
 
     if (isApiError(payload)) {
-      throw new Error("Could not list quotes.")
+      return next(
+        new HttpError({
+          message: "Could not list quotes.",
+        })
+      )
     }
 
     return res.status(200).json({
@@ -73,11 +80,19 @@ export const create = async (
     })
 
     if (isApiError(payload)) {
-      throw new Error("Could not create quote.")
+      return next(
+        new HttpError({
+          message: "Could not create quote.",
+        })
+      )
     }
 
     if (!payload.data) {
-      throw new Error(httpStatusMessages[500].internalError)
+      return next(
+        new HttpError({
+          message: "Could not return new quote ID.",
+        })
+      )
     }
 
     return res.status(201).json({
@@ -113,7 +128,11 @@ export const getById = async (
     }
 
     if (isApiError(payload)) {
-      throw new Error("Could not get quote by id.")
+      return next(
+        new HttpError({
+          message: "Could not get quote by ID.",
+        })
+      )
     }
 
     return res.status(200).json({
@@ -139,7 +158,11 @@ export const deleteById = async (
     })
 
     if (isApiError(payload)) {
-      throw new Error("Could not delete quote.")
+      return next(
+        new HttpError({
+          message: "Could not delete quote by ID.",
+        })
+      )
     }
 
     return res.status(204).json({

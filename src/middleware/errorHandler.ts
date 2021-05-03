@@ -6,18 +6,30 @@ import { HttpStatusCodes, IApiError } from "@ts/api"
 // Constants
 import { httpStatusMessages } from "@constants/http"
 
-export const errorHandler = async (
+// Utils
+import { HttpError } from "@utils/errorHelper"
+
+export const errorHandler = (
   err: IApiError,
   _req: Request,
   res: Response<IApiError>,
   next: NextFunction
-): Promise<void> => {
+): void => {
+  // Delegate to the default Express error handler
+  // if the headers have already been sent
+  if (res.headersSent) return next(err)
+
   const { status, code, message } = err
 
   if (status && code && message) {
-    res.status(status).json(err)
+    res.status(status).json({
+      success: false,
+      status,
+      code,
+      message,
+    })
 
-    return next(new Error(message))
+    return next(new HttpError(err))
   }
 
   res.status(500).json({
@@ -27,5 +39,11 @@ export const errorHandler = async (
     message: httpStatusMessages[500].internalError,
   })
 
-  return next(new Error(httpStatusMessages[500].internalError))
+  next(
+    new HttpError({
+      status: 500,
+      code: HttpStatusCodes.InternalError,
+      message: httpStatusMessages[500].internalError,
+    })
+  )
 }

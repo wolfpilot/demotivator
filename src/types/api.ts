@@ -13,6 +13,8 @@ export enum HttpStatusCodes {
   // 409
   Conflict = "conflict",
   Duplicate = "duplicate",
+  // 415
+  UnsupportedMediaType = "unsupportedMediaType",
   // 500
   InternalError = "internalError",
   // 503
