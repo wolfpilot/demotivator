@@ -28,7 +28,7 @@
     "paths": {
       "*": ["typings/*",],
       "@root/*": ["./*"],
-      "@src/*": ["./src/*"],
+      "@src/*": ["src/*"],
       "@config/*": ["src/config/*"],
       "@constants/*": ["src/constants/*"],
       "@controllers/*": ["src/controllers/*"],
