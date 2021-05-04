@@ -1,4 +1,5 @@
 import express from "express"
+import cors from "cors"
 
 // Middleware
 import { contentTypeValidator } from "@middleware/contentTypeValidator"
@@ -15,6 +16,8 @@ const app = express()
 // Logging middlware
 app.use(requestLogger)
 app.use(debugLogger)
+
+app.use(cors())
 
 // Request validator
 app.put("/*", contentTypeValidator("application/json"))
