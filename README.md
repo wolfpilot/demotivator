@@ -7,6 +7,7 @@ A _mostly_ complete example of an Express server with PostgreSQL db and a bunch 
 - [Demotivator REST API](#demotivator-rest-api)
   - [Table of contents](#table-of-contents)
   - [General info](#general-info)
+  - [Demo](#demo)
   - [Features (done)](#features-done)
   - [Features (TBA)](#features-tba)
   - [Technologies](#technologies)
@@ -24,6 +25,17 @@ _Why do today what you can put off until tomorrow?_
 It's a joke, of course, don't take it too seriously.
 
 The whole idea behind this was to get my hands dirty with setting up APIs: best practices, scaling, maintenance and security vulnerabilities.
+
+## Demo
+
+Endpoints
+
+- All quotes: [https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes](https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes)
+- Single quote: [https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes/5](https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes/5)
+
+Postman
+
+![screenshot](./docs/images/postman-screenshot.png)
 
 ## Features (done)
 
