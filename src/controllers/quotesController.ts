@@ -2,7 +2,7 @@ import { Request, NextFunction } from "express"
 
 // Types
 import { isApiError } from "@ts/typeGuards"
-import { HttpStatusCodes, Params, ResBody, IApiResponse } from "@ts/api"
+import { HttpStatusCodes, Params, ResBody, ApiResponse } from "@ts/api"
 import { IQuoteData } from "@ts/data/quotes"
 
 // Constants
@@ -15,7 +15,7 @@ import { HttpError } from "@utils/errorHelper"
 import * as QuotesModel from "@models/quotesModel"
 
 // Requests
-type IQuotesCreateRequest = Request<
+type QuotesCreateRequest = Request<
   Params,
   ResBody,
   {
@@ -24,27 +24,27 @@ type IQuotesCreateRequest = Request<
   }
 >
 
-export type IQuotesGetByIdRequest = Request<{
+export type QuotesGetByIdRequest = Request<{
   id: string
 }>
 
-export type IQuotesDeleteByIdRequest = Request<{
+export type QuotesDeleteByIdRequest = Request<{
   id: string
 }>
 
 // Responses
-export type IQuotesListResponse = IApiResponse<IQuoteData[]>
-export type IQuotesCreateResponse = IApiResponse<{
+export type QuotesListResponse = ApiResponse<IQuoteData[]>
+export type QuotesCreateResponse = ApiResponse<{
   id: string
 }>
-export type IQuotesGetByIdResponse = IApiResponse<IQuoteData>
-export type IQuotesDeleteByIdResponse = IApiResponse<string>
+export type QuotesGetByIdResponse = ApiResponse<IQuoteData>
+export type QuotesDeleteByIdResponse = ApiResponse<string>
 
 export const list = async (
   _req: Request,
-  res: IQuotesListResponse,
+  res: QuotesListResponse,
   next: NextFunction
-): Promise<IQuotesListResponse | void> => {
+): Promise<QuotesListResponse | void> => {
   try {
     const payload = await QuotesModel.list()
 
@@ -67,10 +67,10 @@ export const list = async (
 }
 
 export const create = async (
-  req: IQuotesCreateRequest,
-  res: IQuotesCreateResponse,
+  req: QuotesCreateRequest,
+  res: QuotesCreateResponse,
   next: NextFunction
-): Promise<IQuotesCreateResponse | void> => {
+): Promise<QuotesCreateResponse | void> => {
   const { author, text } = req.body
 
   try {
@@ -107,10 +107,10 @@ export const create = async (
 }
 
 export const getById = async (
-  req: IQuotesGetByIdRequest,
-  res: IQuotesGetByIdResponse,
+  req: QuotesGetByIdRequest,
+  res: QuotesGetByIdResponse,
   next: NextFunction
-): Promise<IQuotesGetByIdResponse | void> => {
+): Promise<QuotesGetByIdResponse | void> => {
   const { id } = req.params
 
   try {
@@ -146,10 +146,10 @@ export const getById = async (
 }
 
 export const deleteById = async (
-  req: IQuotesDeleteByIdRequest,
-  res: IQuotesDeleteByIdResponse,
+  req: QuotesDeleteByIdRequest,
+  res: QuotesDeleteByIdResponse,
   next: NextFunction
-): Promise<IQuotesDeleteByIdResponse | void> => {
+): Promise<QuotesDeleteByIdResponse | void> => {
   const { id } = req.params
 
   try {

@@ -1,7 +1,7 @@
 import { QueryResult } from "pg"
 
 // Types
-import { HttpStatusCodes, IApiPromise } from "@ts/api"
+import { HttpStatusCodes, ApiPromise } from "@ts/api"
 import { IQuoteData } from "@ts/data/quotes"
 
 // Utils
@@ -31,14 +31,14 @@ export interface IQuotesDeleteByIdQueryResult<T = IQuoteData>
 }
 
 // Results
-export type IQuotesListResponse = IApiPromise<IQuoteData[]>
-export type IQuotesCreateResponse = IApiPromise<{
+export type QuotesListResponse = ApiPromise<IQuoteData[]>
+export type QuotesCreateResponse = ApiPromise<{
   id: string
 }>
-export type IQuotesGetByIdResponse = IApiPromise<IQuoteData>
-export type IQuotesDeleteByIdResponse = IApiPromise
+export type QuotesGetByIdResponse = ApiPromise<IQuoteData>
+export type QuotesDeleteByIdResponse = ApiPromise
 
-export const list = async (): Promise<IQuotesListResponse> => {
+export const list = async (): Promise<QuotesListResponse> => {
   try {
     const res: IQuotesListQueryResult = await pool.query(
       `
@@ -69,7 +69,7 @@ export const create = async ({
 }: {
   author?: string
   text: string
-}): Promise<IQuotesCreateResponse> => {
+}): Promise<QuotesCreateResponse> => {
   try {
     const res: IQuotesCreateQueryResult = await pool.query(
       `
@@ -114,7 +114,7 @@ export const getById = async ({
   id,
 }: {
   id: string
-}): Promise<IQuotesGetByIdResponse> => {
+}): Promise<QuotesGetByIdResponse> => {
   const idNum = parseInt(id, 10)
 
   if (idNum < 1) {
@@ -165,7 +165,7 @@ export const deleteById = async ({
   id,
 }: {
   id: string
-}): Promise<IQuotesDeleteByIdResponse> => {
+}): Promise<QuotesDeleteByIdResponse> => {
   const idNum = parseInt(id, 10)
 
   if (idNum < 1) {
