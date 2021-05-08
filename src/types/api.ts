@@ -28,7 +28,7 @@ export enum HttpStatusCodes {
  *
  * Example usage for custom request body:
  *
- * type IQuotesCreateRequest = Request<
+ * type QuotesCreateRequest = Request<
  *   Params,
  *   ResBody,
  *   {
@@ -60,5 +60,5 @@ export interface IApiError {
   message: string
 }
 
-export type IApiPromise<T = void> = Promise<IApiSuccess<T> | IApiError>
-export type IApiResponse<T = void> = Response<IApiSuccess<T> | IApiError>
+export type ApiPromise<T = void> = Promise<IApiSuccess<T> | IApiError>
+export type ApiResponse<T = void> = Response<IApiSuccess<T> | IApiError>
