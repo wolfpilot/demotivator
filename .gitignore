@@ -22,8 +22,9 @@ logs
 *.log
 
 # Env files
-.env.local
-.env.*.local
+.env
+.env.*
+!.env.example
 
 # Output
 /build
