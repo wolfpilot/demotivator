@@ -18,7 +18,7 @@
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
     "test:coverage": "NODE_ENV=test jest --coverage",
-    "format": "prettier 'src/**/*.ts' --write",
+    "format": "prettier src/**/*.ts --write",
     "validate": "tsc --noEmit",
     "lint": "eslint -f stylish \"**/*.ts\""
   },
