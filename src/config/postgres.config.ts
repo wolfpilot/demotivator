@@ -1,19 +1,20 @@
 import { PoolConfig } from "pg"
 
 const {
-  DATABASE_URL,
+  RENDER,
   PG_USER,
   PG_HOST,
   PG_DATABASE,
+  PG_DATABASE_URL,
   PG_PASSWORD,
   PG_PORT,
 } = process.env
 
-const isHeroku = !!DATABASE_URL
+const isRender = !!RENDER
 
-export const config: PoolConfig = isHeroku
+export const config: PoolConfig = isRender
   ? {
-      connectionString: DATABASE_URL,
+      connectionString: PG_DATABASE_URL,
       ssl: {
         rejectUnauthorized: false,
       },

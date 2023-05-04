@@ -30,8 +30,8 @@ The whole idea behind this was to get my hands dirty with setting up APIs: best 
 
 Endpoints
 
-- All quotes: [https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes](https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes)
-- Single quote: [https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes/5](https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes/5)
+- All quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes)
+- Single quote: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5](https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5)
 
 Postman
 
@@ -95,12 +95,12 @@ Postman
   - [Husky](https://www.npmjs.com/package/husky)
     - Pre-commit
     - Pre-push
-  - [Heroku](https://www.heroku.com/)
+  - [Render](https://www.render.com/)
     - Hosting server and DB
 
 ## API
 
-Either start your own server and visit [http://localhost:9000](http://localhost:9000) or [https://wolfpilot-demotivator-rest-api.herokuapp.com](https://wolfpilot-demotivator-rest-api.herokuapp.com).
+Either start your own server and visit [http://localhost:9000](http://localhost:9000) or [https://wolfpilot-demotivator-rest-api.onrender.com/](https://wolfpilot-demotivator-rest-api.onrender.com/).
 
 ### Endpoints
 
@@ -123,12 +123,12 @@ curl \
     "author": "Steven Wright",
     "text":"The light at the end of the tunnel has been turned off due to budget cuts."
   }' \
-  https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes
+  https://wolfpilot-demotivator-rest-api.onrender.com/quotes
 
 # Delete a quote
 curl \
   -X DELETE \
-  https://wolfpilot-demotivator-rest-api.herokuapp.com/quotes/5
+  https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5
 ```
 
 ## Security
@@ -183,26 +183,6 @@ PostgreSQL shell commands
 "\dt" to inspect tables
 "\du+" to see table of users
 "\q" to quit
-```
-
-Heroku CLI
-
-```bash
-# To connect to the db and user
-heroku pg:psql
-
-# To pull a database
-heroku pg:pull DB_URL local_db_name --app app_name
-
-# To push a database and (optionally) reset first
-heroku pg:reset DB_URL --app app_name
-heroku pg:push local_db_name DB_URL --app app_name
-
-# To log real-time stream
-heroku logs --tail
-
-# To explore the file system (shell)
-heroku run bash
 ```
 
 ## Resources
