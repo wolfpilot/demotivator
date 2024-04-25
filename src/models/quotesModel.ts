@@ -38,6 +38,28 @@ export type QuotesCreateResponse = ApiPromise<{
 export type QuotesGetByIdResponse = ApiPromise<IQuoteData>
 export type QuotesDeleteByIdResponse = ApiPromise
 
+// Utils
+const parseError = (err: unknown) => {
+  if (err instanceof Error) {
+    console.error(err.message, err.stack)
+
+    return Promise.reject({
+      success: false,
+      status: 503,
+      code: HttpStatusCodes.BackendError,
+      message: httpStatusMessages[503].backendError,
+    })
+  }
+
+  return Promise.reject({
+    success: false,
+    status: 520,
+    code: HttpStatusCodes.UnknownError,
+    message: httpStatusMessages[520].unknownError,
+  })
+}
+
+// Functions
 export const list = async (): Promise<QuotesListResponse> => {
   try {
     const res: IQuotesListQueryResult = await pool.query(
@@ -51,15 +73,8 @@ export const list = async (): Promise<QuotesListResponse> => {
       status: 204,
       data: res.rows,
     })
-  } catch (err) {
-    console.error(err.message, err.stack)
-
-    return Promise.reject({
-      success: false,
-      status: 503,
-      code: HttpStatusCodes.BackendError,
-      message: httpStatusMessages[503].backendError,
-    })
+  } catch (err: unknown) {
+    return parseError(err)
   }
 }
 
@@ -98,15 +113,8 @@ export const create = async ({
         id: id.toString(),
       },
     })
-  } catch (err) {
-    console.error(err.message, err.stack)
-
-    return Promise.reject({
-      success: false,
-      status: 503,
-      code: HttpStatusCodes.BackendError,
-      message: httpStatusMessages[503].backendError,
-    })
+  } catch (err: unknown) {
+    return parseError(err)
   }
 }
 
@@ -149,15 +157,8 @@ export const getById = async ({
       status: 204,
       data: res.rows[0],
     })
-  } catch (err) {
-    console.error(err.message, err.stack)
-
-    return Promise.reject({
-      success: false,
-      status: 503,
-      code: HttpStatusCodes.BackendError,
-      message: httpStatusMessages[503].backendError,
-    })
+  } catch (err: unknown) {
+    return parseError(err)
   }
 }
 
@@ -200,14 +201,7 @@ export const deleteById = async ({
       success: true,
       status: 204,
     })
-  } catch (err) {
-    console.error(err.message, err.stack)
-
-    return Promise.reject({
-      success: false,
-      status: 503,
-      code: HttpStatusCodes.BackendError,
-      message: httpStatusMessages[503].backendError,
-    })
+  } catch (err: unknown) {
+    return parseError(err)
   }
 }

@@ -45,25 +45,21 @@ export const list = async (
   res: QuotesListResponse,
   next: NextFunction
 ): Promise<QuotesListResponse | void> => {
-  try {
-    const payload = await QuotesModel.list()
+  const payload = await QuotesModel.list()
 
-    if (isApiError(payload)) {
-      return next(
-        new HttpError({
-          message: "Could not list quotes.",
-        })
-      )
-    }
-
-    return res.status(200).json({
-      success: true,
-      status: 200,
-      data: payload.data,
-    })
-  } catch (err) {
-    next(err)
+  if (isApiError(payload)) {
+    return next(
+      new HttpError({
+        message: "Could not list quotes.",
+      })
+    )
   }
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    data: payload.data,
+  })
 }
 
 export const create = async (
@@ -73,37 +69,33 @@ export const create = async (
 ): Promise<QuotesCreateResponse | void> => {
   const { author, text } = req.body
 
-  try {
-    const payload = await QuotesModel.create({
-      author,
-      text,
-    })
+  const payload = await QuotesModel.create({
+    author,
+    text,
+  })
 
-    if (isApiError(payload)) {
-      return next(
-        new HttpError({
-          message: "Could not create quote.",
-        })
-      )
-    }
-
-    if (!payload.data) {
-      return next(
-        new HttpError({
-          message: "Could not return new quote ID.",
-        })
-      )
-    }
-
-    return res.status(201).json({
-      success: true,
-      status: 201,
-      data: payload.data,
-      message: `Quote added with ID ${payload.data.id}`,
-    })
-  } catch (err) {
-    next(err)
+  if (isApiError(payload)) {
+    return next(
+      new HttpError({
+        message: "Could not create quote.",
+      })
+    )
   }
+
+  if (!payload.data) {
+    return next(
+      new HttpError({
+        message: "Could not return new quote ID.",
+      })
+    )
+  }
+
+  res.status(201).json({
+    success: true,
+    status: 201,
+    data: payload.data,
+    message: `Quote added with ID ${payload.data.id}`,
+  })
 }
 
 export const getById = async (
@@ -113,36 +105,32 @@ export const getById = async (
 ): Promise<QuotesGetByIdResponse | void> => {
   const { id } = req.params
 
-  try {
-    const payload = await QuotesModel.getById({
-      id,
+  const payload = await QuotesModel.getById({
+    id,
+  })
+
+  if (!payload) {
+    return res.status(404).json({
+      success: false,
+      status: 404,
+      code: HttpStatusCodes.NotFound,
+      message: httpStatusMessages[404].notFound,
     })
-
-    if (!payload) {
-      return res.status(404).json({
-        success: false,
-        status: 404,
-        code: HttpStatusCodes.NotFound,
-        message: httpStatusMessages[404].notFound,
-      })
-    }
-
-    if (isApiError(payload)) {
-      return next(
-        new HttpError({
-          message: "Could not get quote by ID.",
-        })
-      )
-    }
-
-    return res.status(200).json({
-      success: true,
-      status: 200,
-      data: payload.data,
-    })
-  } catch (err) {
-    next(err)
   }
+
+  if (isApiError(payload)) {
+    return next(
+      new HttpError({
+        message: "Could not get quote by ID.",
+      })
+    )
+  }
+
+  res.status(200).json({
+    success: true,
+    status: 200,
+    data: payload.data,
+  })
 }
 
 export const deleteById = async (
@@ -152,25 +140,21 @@ export const deleteById = async (
 ): Promise<QuotesDeleteByIdResponse | void> => {
   const { id } = req.params
 
-  try {
-    const payload = await QuotesModel.deleteById({
-      id,
-    })
+  const payload = await QuotesModel.deleteById({
+    id,
+  })
 
-    if (isApiError(payload)) {
-      return next(
-        new HttpError({
-          message: "Could not delete quote by ID.",
-        })
-      )
-    }
-
-    return res.status(204).json({
-      success: true,
-      status: 204,
-      message: `Quote deleted with ID ${id}`,
-    })
-  } catch (err) {
-    next(err)
+  if (isApiError(payload)) {
+    return next(
+      new HttpError({
+        message: "Could not delete quote by ID.",
+      })
+    )
   }
+
+  res.status(204).json({
+    success: true,
+    status: 204,
+    message: `Quote deleted with ID ${id}`,
+  })
 }
