@@ -40,4 +40,7 @@ export const httpStatusMessages = {
     backendNotConnected: "The request failed due to a connection error.",
     notReady: "The API server is not ready to accept requests.",
   }),
+  520: asStrings({
+    unknownError: "An unknown error occurred.",
+  }),
 }

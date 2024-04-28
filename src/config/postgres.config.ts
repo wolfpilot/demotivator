@@ -10,9 +10,9 @@ const {
   PG_PORT,
 } = process.env
 
-const isRender = !!RENDER
+const isRenderHost = !!RENDER
 
-export const config: PoolConfig = isRender
+export const config: PoolConfig = isRenderHost
   ? {
       connectionString: PG_DATABASE_URL,
       ssl: {

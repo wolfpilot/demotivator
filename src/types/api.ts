@@ -21,6 +21,8 @@ export enum HttpStatusCodes {
   BackendError = "backendError",
   BackendNotConnected = "backendNotConnected",
   NotReady = "notReady",
+  // 520
+  UnknownError = "unknownError",
 }
 
 /**
