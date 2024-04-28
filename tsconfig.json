@@ -26,7 +26,7 @@
     "removeComments": false,
     "preserveConstEnums": true,
     "paths": {
-      "*": ["typings/*",],
+      "*": ["typings/*"],
       "@root/*": ["./*"],
       "@src/*": ["src/*"],
       "@config/*": ["src/config/*"],
@@ -43,8 +43,7 @@
     },
   },
   "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
+    "node_modules"
   ],
   "include": [
     "typings/**/*.d.ts",

@@ -12,7 +12,7 @@
     "clean": "yarn clean:build && yarn clean:pkgs",
     "clean:build": "rimraf ./build",
     "clean:pkgs": "rimraf ./node_modules",
-    "build": "yarn clean:build && tsc -p ./",
+    "build": "yarn clean:build && tsc -b ./tsconfig.prod.json",
     "start:dev": "NODE_ENV=development ts-node-dev -r tsconfig-paths/register src/server.ts",
     "start:prod": "NODE_ENV=production node -r ts-node/register/transpile-only -r tsconfig-paths/register build/server.js",
     "test": "NODE_ENV=test jest",
