@@ -137,7 +137,7 @@ Although several precautions have been taken such as restricting user privileges
 
 Other measures that comes to mind are:
 
-- Crepared statements
+- Prepared statements
 - Checking payloads for potentially dangerous SQL statements
 - Throttling requests to prevent flooding
 
