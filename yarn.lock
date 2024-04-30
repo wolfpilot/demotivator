@@ -2057,6 +2057,11 @@ express-json-validator-middleware@^2.1.1:
     "@types/json-schema" "^7.0.4"
     ajv "^6.6.2"
 
+express-rate-limit@^7.2.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/express-rate-limit/-/express-rate-limit-7.2.0.tgz#06ce387dd5388f429cab8263c514fc07bf90a445"
+  integrity sha512-T7nul1t4TNyfZMJ7pKRKkdeVJWa2CqB8NA1P8BwYaoDI5QSBZARv5oMS43J7b7I5P+4asjVXjb7ONuwDKucahg==
+
 express-winston@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/express-winston/-/express-winston-4.1.0.tgz#3fd3ecea55d50ff6aee49a66e1aaa3cba8b67c93"
@@ -4933,6 +4938,7 @@ string_decoder@~1.1.1:
     safe-buffer "~5.1.0"
 
 "strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.1:
+  name strip-ansi-cjs
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==

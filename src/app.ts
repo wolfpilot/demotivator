@@ -5,6 +5,7 @@ import cors from "cors"
 import { contentTypeValidator } from "@middleware/contentTypeValidator"
 import { errorValidator } from "@root/src/middleware/errorValidator"
 import { errorHandler } from "@middleware/errorHandler"
+import { rateLimiter } from "@middleware/rateLimiter"
 import { debugLogger, requestLogger, errorLogger } from "@middleware/logger"
 
 // Routes
@@ -26,6 +27,9 @@ app.patch("/*", contentTypeValidator("application/json"))
 
 // Body parser
 app.use(express.json())
+
+// Limiter middleware
+app.use(rateLimiter)
 
 // Routes
 app.use("/quotes", quotesRoutes)
