@@ -1,7 +1,12 @@
 import { QueryResult } from "pg"
 
 // Types
-import { HttpStatusCodes, ApiPromise } from "@ts/api"
+import {
+  HttpStatusCodes,
+  ApiPromise,
+  IPaginationData,
+  IPaginationQueryResult,
+} from "@ts/api"
 import { IQuoteData } from "@ts/data/quotes"
 
 // Utils
@@ -11,8 +16,8 @@ import { pool } from "@utils/dbHelper"
 import { httpStatusMessages } from "@constants/http"
 
 // Queries
-export interface IQuotesListQueryResult<T = IQuoteData> extends QueryResult {
-  rows: T[]
+export interface IQuotesListQueryResult extends QueryResult {
+  rows: IQuoteData[]
 }
 
 export interface IQuotesCreateQueryResult extends QueryResult {
@@ -21,22 +26,26 @@ export interface IQuotesCreateQueryResult extends QueryResult {
   }[]
 }
 
-export interface IQuotesGetByIdQueryResult<T = IQuoteData> extends QueryResult {
-  rows: T[]
+export interface IQuotesGetByIdQueryResult extends QueryResult {
+  rows: IQuoteData[]
 }
 
-export interface IQuotesDeleteByIdQueryResult<T = IQuoteData>
-  extends QueryResult {
-  rows: T[]
+export interface IQuotesDeleteByIdQueryResult extends QueryResult {
+  rows: IQuoteData[]
 }
 
 // Results
-export type QuotesListResponse = ApiPromise<IQuoteData[]>
+export type QuotesListResponse = ApiPromise<IQuoteData[], IPaginationData>
 export type QuotesCreateResponse = ApiPromise<{
   id: string
 }>
 export type QuotesGetByIdResponse = ApiPromise<IQuoteData>
 export type QuotesDeleteByIdResponse = ApiPromise
+
+// Setup
+const MIN_LIMIT_RECORDS_PER_PAGE = 2
+const MAX_LIMIT_RECORDS_PER_PAGE = 100
+const MIN_CURRENT_PAGE = 1
 
 // Utils
 const parseError = (err: unknown) => {
@@ -60,18 +69,86 @@ const parseError = (err: unknown) => {
 }
 
 // Functions
-export const list = async (): Promise<QuotesListResponse> => {
+/**
+ *
+ * @param limit - The amount of records to be fetched from the DB.
+ * @param page - The index of the groupd of records being requested.
+ */
+export const list = async ({
+  limit,
+  page,
+}: {
+  limit: number
+  page: number
+}): Promise<QuotesListResponse> => {
   try {
-    const res: IQuotesListQueryResult = await pool.query(
+    // Pagination
+    const countRes: IPaginationQueryResult = await pool.query(
       `
-      SELECT * FROM quotes;
+      SELECT count(*) FROM quotes;
       `
     )
+
+    const totalRecords = countRes.rows[0].count
+    const totalPages = Math.ceil(totalRecords / limit)
+
+    const nextPage = page >= totalPages ? null : page + 1
+    const prevPage = page <= MIN_CURRENT_PAGE ? null : page - 1
+
+    /**
+     * As pagination only makes sense when fetching multiple items,
+     * "limit" must be constrained between 2 and an arbitrary max (i.e. 100).
+     */
+
+    if (
+      limit < MIN_LIMIT_RECORDS_PER_PAGE ||
+      limit > MAX_LIMIT_RECORDS_PER_PAGE
+    ) {
+      return Promise.reject({
+        success: false,
+        status: 400,
+        code: HttpStatusCodes.BadRequest,
+        message: `Query param 'limit' is out of bounds (min ${MIN_LIMIT_RECORDS_PER_PAGE}, max ${MAX_LIMIT_RECORDS_PER_PAGE}).`,
+      })
+    }
+
+    /**
+     * To ensure the page does not become negative, the "pageNumber" should
+     * have a minimum value of 1.
+     */
+    if (page < MIN_CURRENT_PAGE || page > totalPages) {
+      return Promise.reject({
+        success: false,
+        status: 400,
+        code: HttpStatusCodes.BadRequest,
+        message: `Query param 'page' is out of bounds (min ${MIN_CURRENT_PAGE}, max ${totalPages}).`,
+      })
+    }
+
+    // Data
+    const dataRes: IQuotesListQueryResult = await pool.query(
+      `
+      SELECT * FROM quotes
+      ORDER BY id
+      LIMIT $1
+      OFFSET ($2 - 1) * $1;
+      `,
+      [limit, page]
+    )
+
+    const paginationData: IPaginationData = {
+      totalRecords,
+      totalPages,
+      currentPage: page,
+      nextPage,
+      prevPage,
+    }
 
     return Promise.resolve({
       success: true,
       status: 204,
-      data: res.rows,
+      data: dataRes.rows,
+      pagination: paginationData,
     })
   } catch (err: unknown) {
     return parseError(err)
