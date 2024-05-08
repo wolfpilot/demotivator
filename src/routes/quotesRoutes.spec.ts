@@ -15,27 +15,15 @@ const sql = fs
   .readFileSync(path.resolve(__dirname, "../database/seeds/quotesSeed.sql"))
   .toString()
 
-beforeAll(async () => {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS quotes (
-      id SERIAL PRIMARY KEY,
-      author VARCHAR(128),
-      text TEXT NOT NULL
-    );
-  `)
-})
-
 beforeEach(async () => {
   await pool.query(sql)
 })
 
 afterEach(async () => {
-  await pool.query("DELETE FROM quotes;")
+  await pool.query("DROP TABLE IF EXISTS quotes;")
 })
 
 afterAll(async () => {
-  await pool.query("DROP TABLE IF EXISTS quotes;")
-
   /**
    * Fix Jest not exiting after test suite is completed
    *
