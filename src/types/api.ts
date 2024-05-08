@@ -1,5 +1,6 @@
 import * as core from "express-serve-static-core"
 import { Response } from "express"
+import { QueryResult } from "pg"
 
 export enum HttpStatusCodes {
   // 400
@@ -47,11 +48,26 @@ export type ResBody = any
 export type ReqBody = any
 export type Query = core.Query
 
+export interface IPaginationQueryResult extends QueryResult {
+  rows: {
+    count: number
+  }[]
+}
+
+export interface IPaginationData {
+  totalRecords: number
+  totalPages: number
+  currentPage: number
+  nextPage: number | null
+  prevPage: number | null
+}
+
 // API Status
-export interface IApiSuccess<T> {
+export interface IApiSuccess<T, K> {
   success: boolean
   status: number
   data?: T
+  pagination?: K
   message?: string
 }
 
@@ -62,5 +78,9 @@ export interface IApiError {
   message: string
 }
 
-export type ApiPromise<T = void> = Promise<IApiSuccess<T> | IApiError>
-export type ApiResponse<T = void> = Response<IApiSuccess<T> | IApiError>
+export type ApiPromise<T = void, K = void> = Promise<
+  IApiSuccess<T, K> | IApiError
+>
+export type ApiResponse<T = void, K = void> = Response<
+  IApiSuccess<T, K> | IApiError
+>

@@ -2,7 +2,13 @@ import { Request, NextFunction } from "express"
 
 // Types
 import { isApiError } from "@ts/typeGuards"
-import { HttpStatusCodes, Params, ResBody, ApiResponse } from "@ts/api"
+import {
+  HttpStatusCodes,
+  Params,
+  ResBody,
+  IPaginationData,
+  ApiResponse,
+} from "@ts/api"
 import { IQuoteData } from "@ts/data/quotes"
 
 // Constants
@@ -33,19 +39,57 @@ export type QuotesDeleteByIdRequest = Request<{
 }>
 
 // Responses
-export type QuotesListResponse = ApiResponse<IQuoteData[]>
+export type QuotesListResponse = ApiResponse<IQuoteData[], IPaginationData>
 export type QuotesCreateResponse = ApiResponse<{
   id: string
 }>
 export type QuotesGetByIdResponse = ApiResponse<IQuoteData>
 export type QuotesDeleteByIdResponse = ApiResponse<string>
 
+// Setup
+const DEFAULT_RECORDS_PER_PAGE = "10"
+const DEFAULT_PAGE_NUMBER = "1"
+
 export const list = async (
-  _req: Request,
+  req: Request,
   res: QuotesListResponse,
   next: NextFunction
 ): Promise<QuotesListResponse | void> => {
-  const payload = await QuotesModel.list()
+  const {
+    limit = DEFAULT_RECORDS_PER_PAGE,
+    page = DEFAULT_PAGE_NUMBER,
+  } = req.query
+
+  // Check if string
+  if (typeof limit !== "string" || typeof page !== "string") {
+    return next(
+      new HttpError({
+        status: 400,
+        code: HttpStatusCodes.BadRequest,
+        message: "Query params must to be of type string.",
+      })
+    )
+  }
+
+  // Coerce to numbers
+  const parsedLimit = parseInt(limit, 10)
+  const parsedPage = parseInt(page, 10)
+
+  // Exclude NaN
+  if (Number.isNaN(parsedLimit) || Number.isNaN(parsedPage)) {
+    return next(
+      new HttpError({
+        status: 400,
+        code: HttpStatusCodes.BadRequest,
+        message: "Query params must be convertible to numbers.",
+      })
+    )
+  }
+
+  const payload = await QuotesModel.list({
+    limit: parsedLimit,
+    page: parsedPage,
+  })
 
   if (isApiError(payload)) {
     return next(
@@ -59,6 +103,7 @@ export const list = async (
     success: true,
     status: 200,
     data: payload.data,
+    pagination: payload?.pagination,
   })
 }
 

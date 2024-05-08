@@ -6,7 +6,7 @@ import path from "path"
 import app from "@src/app"
 
 // Data
-import { quotesMock } from "@mocks/quotesMock"
+import { quotesMockData, quotesMockPagination } from "@mocks/quotesMock"
 
 // Utils
 import { pool } from "@utils/dbHelper"
@@ -46,10 +46,41 @@ afterAll(async () => {
 })
 
 describe("GET /quotes", () => {
-  it("should list all the quotes", async () => {
+  it("should retrieve the default first page of quotes", async () => {
     const res = await req(app).get("/quotes")
     expect(res.status).toBe(200)
-    expect(res.body.data).toEqual(quotesMock)
+    expect(res.body.data).toEqual(quotesMockData)
+    expect(res.body.pagination).toEqual(quotesMockPagination)
+  })
+
+  it("should retrieve a specific page of quotes", async () => {
+    const res = await req(app).get("/quotes?limit=2&page=4")
+    expect(res.status).toBe(200)
+    expect(res.body.data).toEqual([quotesMockData[6], quotesMockData[7]])
+    expect(res.body.pagination).toEqual({
+      totalRecords: "10",
+      totalPages: 5,
+      currentPage: 4,
+      nextPage: 5,
+      prevPage: 3,
+    })
+  })
+
+  it("should fail to retrieve quotes when parameters fall out of bounds", async () => {
+    const res1 = await req(app).get("/quotes?limit=0")
+    expect(res1.status).toBe(400)
+
+    const res2 = await req(app).get("/quotes?limit=500")
+    expect(res2.status).toBe(400)
+
+    const res3 = await req(app).get("/quotes?page=0")
+    expect(res3.status).toBe(400)
+
+    const res4 = await req(app).get("/quotes?page=100")
+    expect(res4.status).toBe(400)
+
+    const res5 = await req(app).get("/quotes?limit=5&page=3")
+    expect(res5.status).toBe(400)
   })
 })
 
@@ -105,7 +136,7 @@ describe("GET /quotes:id", () => {
   it("should retrieve a single quote with a populated id", async () => {
     const res = await req(app).get("/quotes/1")
     expect(res.status).toBe(200)
-    expect(res.body.data).toEqual(quotesMock[0])
+    expect(res.body.data).toEqual(quotesMockData[0])
   })
 
   it("should fail retrieving a quote with non-existent ids", async () => {
