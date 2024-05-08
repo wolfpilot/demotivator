@@ -114,18 +114,71 @@ Either start your own server and visit [http://localhost:9000](http://localhost:
 
 ### Examples
 
+Simply copy-paste the following examples in your bash terminal making sure to separate newlines with "\\" on Mac or "^" on Windows.
+
+If running locally, please use "http://localhost:9000" instead.
+
+#### List paginated quotes
+
+- GET /quotes
+
 ```bash
-# Create a new quote
+curl \
+  -H "Content-Type: application/json" \
+  -X GET \
+  https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2\&page=4
+
+Query params:
+  limit
+    # The amount of records to be fetched from the DB.
+    type: string
+    min: 2
+    max: 100
+  page
+    # The index of the groupd of records being requested.
+    type: string
+    min: 1
+    max: dynamic
+```
+
+#### Get a specific quote
+
+- POST /quotes
+
+```bash
+curl \
+  -X GET \
+  https://wolfpilot-demotivator-rest-api.onrender.com/quotes/3
+```
+
+#### Create a new quote
+
+- GET /quotes/:id
+
+```bash
 curl \
   -H 'Content-Type: application/json' \
   -X POST \
   -d '{
     "author": "Steven Wright",
-    "text":"The light at the end of the tunnel has been turned off due to budget cuts."
+    "text": "The light at the end of the tunnel has been turned off due to budget cuts."
   }' \
   https://wolfpilot-demotivator-rest-api.onrender.com/quotes
 
-# Delete a quote
+Body:
+  # The author of the quote.
+  author
+    type: string
+  # The quote itself.
+  text
+    type: string
+```
+
+#### Delete a quote
+
+- DELETE /quotes/:id
+
+```bash
 curl \
   -X DELETE \
   https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5
