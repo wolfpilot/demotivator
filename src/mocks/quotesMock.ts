@@ -1,4 +1,4 @@
-export const quotesMock = [
+export const quotesMockData = [
   {
     id: 1,
     author: "Homer Simpson",
@@ -54,3 +54,16 @@ export const quotesMock = [
       "It's only when you look at an ant through a magnifying glass on a sunny day that you realize how often they burst into flames.",
   },
 ]
+
+export const quotesMockPagination = {
+  totalRecords: "10",
+  totalPages: 1,
+  currentPage: 1,
+  nextPage: null,
+  prevPage: null,
+}
+
+export const quotesMock = {
+  data: quotesMockData,
+  pagination: quotesMockPagination,
+}
