@@ -1,22 +1,14 @@
 import { Request, Response, NextFunction } from "express"
 
-// Types
-import { HttpStatusCodes } from "@ts/api"
-
-// Constants
-import { httpStatusMessages } from "@constants/http"
+// Utils
+import { HttpError } from "@utils/errorHelper"
 
 export const contentTypeValidator = (type: string) => (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
   if (req.is(type)) return next()
 
-  res.status(415).json({
-    success: false,
-    status: 415,
-    code: HttpStatusCodes.UnsupportedMediaType,
-    message: httpStatusMessages[415].unsupportedMediaType,
-  })
+  next(new HttpError("UnsupportedMediaType"))
 }

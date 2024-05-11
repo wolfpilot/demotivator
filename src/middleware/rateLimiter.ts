@@ -1,9 +1,7 @@
 import { Options, rateLimit } from "express-rate-limit"
 
-// Setup
-const { RENDER } = process.env
-
-const isRenderHost = !!RENDER
+// Utils
+import { isRenderHost } from "@utils/envHelper"
 
 const TIME_WINDOW_IN_MINUTES = 1
 const MAX_REQUESTS_PER_WINDOW = 10

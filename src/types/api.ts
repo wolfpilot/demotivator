@@ -2,29 +2,8 @@ import * as core from "express-serve-static-core"
 import { Response } from "express"
 import { QueryResult } from "pg"
 
-export enum HttpStatusCodes {
-  // 400
-  BadRequest = "badRequest",
-  Invalid = "invalid",
-  ParseError = "parseError",
-  Required = "required",
-  UnknownApi = "unknownApi",
-  // 404
-  NotFound = "notFound",
-  // 409
-  Conflict = "conflict",
-  Duplicate = "duplicate",
-  // 415
-  UnsupportedMediaType = "unsupportedMediaType",
-  // 500
-  InternalError = "internalError",
-  // 503
-  BackendError = "backendError",
-  BackendNotConnected = "backendNotConnected",
-  NotReady = "notReady",
-  // 520
-  UnknownError = "unknownError",
-}
+// Types
+import { HttpError } from "@utils/errorHelper"
 
 /**
  * Re-export Express Request generics for easier extension.
@@ -41,11 +20,9 @@ export enum HttpStatusCodes {
  *   Query
  * >
  */
+export type ResBody = unknown
+export type ReqBody = unknown
 export type Params = core.ParamsDictionary
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export type ResBody = any
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export type ReqBody = any
 export type Query = core.Query
 
 export interface IPaginationQueryResult extends QueryResult {
@@ -63,24 +40,21 @@ export interface IPaginationData {
 }
 
 // API Status
-export interface IApiSuccess<T, K> {
-  success: boolean
-  status: number
+export type IApiError = HttpError // | ValidationError | ...others
+
+export interface ModelSuccess<T = void, K = void> {
   data?: T
   pagination?: K
+}
+
+export type ModelResponse<T = void, K = void> =
+  | ModelSuccess<T, K>
+  | IApiError
+  | void
+
+export interface IApiSuccess<T = void, K = void> extends ModelSuccess<T, K> {
+  success: boolean
   message?: string
 }
 
-export interface IApiError {
-  success: boolean
-  status: number
-  code: HttpStatusCodes
-  message: string
-}
-
-export type ApiPromise<T = void, K = void> = Promise<
-  IApiSuccess<T, K> | IApiError
->
-export type ApiResponse<T = void, K = void> = Response<
-  IApiSuccess<T, K> | IApiError
->
+export type ApiResponse<T = void, K = void> = Response<IApiSuccess<T, K>>

@@ -27,8 +27,7 @@ afterAll(async () => {
   /**
    * Fix Jest not exiting after test suite is completed
    *
-   * More info at:
-   * https://github.com/facebook/jest/issues/7287
+   * @see https://github.com/facebook/jest/issues/7287
    */
   pool.end()
 })

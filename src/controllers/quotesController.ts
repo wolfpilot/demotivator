@@ -2,17 +2,8 @@ import { Request, NextFunction } from "express"
 
 // Types
 import { isApiError } from "@ts/typeGuards"
-import {
-  HttpStatusCodes,
-  Params,
-  ResBody,
-  IPaginationData,
-  ApiResponse,
-} from "@ts/api"
+import { Params, ResBody, IPaginationData, ApiResponse } from "@ts/api"
 import { IQuoteData } from "@ts/data/quotes"
-
-// Constants
-import { httpStatusMessages } from "@constants/http"
 
 // Utils
 import { HttpError } from "@utils/errorHelper"
@@ -40,16 +31,20 @@ export type QuotesDeleteByIdRequest = Request<{
 
 // Responses
 export type QuotesListResponse = ApiResponse<IQuoteData[], IPaginationData>
-export type QuotesCreateResponse = ApiResponse<{
-  id: string
-}>
+export type QuotesCreateResponse = ApiResponse<{ id: string }>
 export type QuotesGetByIdResponse = ApiResponse<IQuoteData>
-export type QuotesDeleteByIdResponse = ApiResponse<string>
+export type QuotesDeleteByIdResponse = ApiResponse<void>
 
 // Setup
 const DEFAULT_RECORDS_PER_PAGE = "10"
 const DEFAULT_PAGE_NUMBER = "1"
 
+/**
+ * ?: Why explicit return at the end of functions?
+ *
+ * Because otherwise TypeScript doesn't check the return values
+ * making it more or less useless validating the promise.
+ */
 export const list = async (
   req: Request,
   res: QuotesListResponse,
@@ -63,11 +58,7 @@ export const list = async (
   // Check if string
   if (typeof limit !== "string" || typeof page !== "string") {
     return next(
-      new HttpError({
-        status: 400,
-        code: HttpStatusCodes.BadRequest,
-        message: "Query params must to be of type string.",
-      })
+      new HttpError("BadRequest", "Query params must to be of type string.")
     )
   }
 
@@ -78,11 +69,10 @@ export const list = async (
   // Exclude NaN
   if (Number.isNaN(parsedLimit) || Number.isNaN(parsedPage)) {
     return next(
-      new HttpError({
-        status: 400,
-        code: HttpStatusCodes.BadRequest,
-        message: "Query params must be convertible to numbers.",
-      })
+      new HttpError(
+        "BadRequest",
+        "Query params must be convertible to numbers."
+      )
     )
   }
 
@@ -91,19 +81,17 @@ export const list = async (
     page: parsedPage,
   })
 
-  if (isApiError(payload)) {
-    return next(
-      new HttpError({
-        message: "Could not list quotes.",
-      })
-    )
+  if (payload instanceof HttpError) {
+    return next(new HttpError("BadGateway", "Could not list quotes."))
   }
 
-  res.status(200).json({
+  if (!payload || !payload.data) {
+    return next(new HttpError("BadGateway", "Could not list quotes."))
+  }
+
+  return res.status(200).json({
+    ...payload,
     success: true,
-    status: 200,
-    data: payload.data,
-    pagination: payload?.pagination,
   })
 }
 
@@ -120,25 +108,16 @@ export const create = async (
   })
 
   if (isApiError(payload)) {
-    return next(
-      new HttpError({
-        message: "Could not create quote.",
-      })
-    )
+    return next(new HttpError("BadGateway", "Could not create quote."))
   }
 
-  if (!payload.data) {
-    return next(
-      new HttpError({
-        message: "Could not return new quote ID.",
-      })
-    )
+  if (!payload || !payload.data) {
+    return next(new HttpError("BadGateway", "Could not return new quote ID."))
   }
 
-  res.status(201).json({
+  return res.status(201).json({
+    ...payload,
     success: true,
-    status: 201,
-    data: payload.data,
     message: `Quote added with ID ${payload.data.id}`,
   })
 }
@@ -155,51 +134,27 @@ export const getById = async (
   })
 
   if (!payload) {
-    return res.status(404).json({
-      success: false,
-      status: 404,
-      code: HttpStatusCodes.NotFound,
-      message: httpStatusMessages[404].notFound,
-    })
+    return next(new HttpError("NotFound", "Could not get quote by ID."))
   }
 
-  if (isApiError(payload)) {
-    return next(
-      new HttpError({
-        message: "Could not get quote by ID.",
-      })
-    )
-  }
-
-  res.status(200).json({
+  return res.status(200).json({
+    ...payload,
     success: true,
-    status: 200,
-    data: payload.data,
   })
 }
 
 export const deleteById = async (
   req: QuotesDeleteByIdRequest,
-  res: QuotesDeleteByIdResponse,
-  next: NextFunction
+  res: QuotesDeleteByIdResponse
 ): Promise<QuotesDeleteByIdResponse | void> => {
   const { id } = req.params
 
-  const payload = await QuotesModel.deleteById({
+  await QuotesModel.deleteById({
     id,
   })
 
-  if (isApiError(payload)) {
-    return next(
-      new HttpError({
-        message: "Could not delete quote by ID.",
-      })
-    )
-  }
-
-  res.status(204).json({
+  return res.status(204).json({
     success: true,
-    status: 204,
     message: `Quote deleted with ID ${id}`,
   })
 }

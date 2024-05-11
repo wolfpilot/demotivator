@@ -100,7 +100,7 @@ Postman
 
 ## API
 
-Either start your own server and visit [http://localhost:9000](http://localhost:9000) or [https://wolfpilot-demotivator-rest-api.onrender.com/](https://wolfpilot-demotivator-rest-api.onrender.com/).
+Either start your own server and visit [http://localhost:9000](http://localhost:9000) or [https://wolfpilot-demotivator-rest-api.onrender.com](https://wolfpilot-demotivator-rest-api.onrender.com).
 
 ### Endpoints
 
@@ -116,7 +116,9 @@ Either start your own server and visit [http://localhost:9000](http://localhost:
 
 Simply copy-paste the following examples in your bash terminal making sure to separate newlines with "\\" on Mac or "^" on Windows.
 
-If running locally, please use "http://localhost:9000" instead.
+If running locally, please use "http://localhost:9000" instead. Alternatively, import the collection below in your own Postman instance and have some fun!
+
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://god.gw.postman.com/run-collection/:1901372-befc03ae-8d05-45d4-b3d7-501902d09998)
 
 #### List paginated quotes
 

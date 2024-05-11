@@ -1,46 +1,83 @@
 // Utils
-import { asStrings } from "@utils/typeHelper"
+export enum HttpStatusNames {
+  // 400
+  BadRequest = "BadRequest",
+  // 403
+  Forbidden = "Forbidden",
+  // 404
+  NotFound = "NotFound",
+  // 409
+  Conflict = "Conflict",
+  // 415
+  UnsupportedMediaType = "UnsupportedMediaType",
+  // 500
+  InternalServerError = "InternalServerError",
+  // 502
+  BadGateway = "BadGateway",
+  // 503
+  ServiceUnavailable = "ServiceUnavailable",
+}
+
+export interface HttpStatusCode {
+  name: HttpStatusNames
+  status: number
+  message: string
+}
+
+export type HttpStatusCodes = Record<
+  keyof typeof HttpStatusNames,
+  HttpStatusCode
+>
 
 /**
- * Shamelessly referenced from Google's Webmaster Tools v3
- * standard error responses documentation. More info at:
+ * Shamelessly plugged from Google's Webmaster Tools v3 standard error responses documentation.
  *
- * https://developers.google.com/webmaster-tools/search-console-api-original/v3/errors
+ * @see https://developers.google.com/webmaster-tools/search-console-api-original/v3/errors
  */
-export const httpStatusMessages = {
-  400: asStrings({
-    badRequest:
+export const httpStatusCodes: HttpStatusCodes = {
+  BadRequest: {
+    status: 400,
+    name: HttpStatusNames.BadRequest,
+    message:
       "The API request is invalid or improperly formed. Consequently, the API server could not understand the request.",
-    invalid:
-      "The request failed because it contained an invalid value. The value could be a parameter value, a header value, or a property value.",
-    parseError: "The API server cannot parse the request body.",
-    required:
-      "The API request is missing required information. The required information could be a parameter or resource property.",
-    unknownApi: "The API that the request is calling is not recognized.",
-  }),
-  404: asStrings({
-    notFound:
+  },
+  Forbidden: {
+    status: 403,
+    name: HttpStatusNames.Forbidden,
+    message: "The requested operation is forbidden and cannot be completed.",
+  },
+  NotFound: {
+    status: 404,
+    name: HttpStatusNames.NotFound,
+    message:
       "The requested operation failed because a resource associated with the request could not be found.",
-  }),
-  409: asStrings({
-    conflict:
+  },
+  Conflict: {
+    status: 409,
+    name: HttpStatusNames.Conflict,
+    message:
       "The API request cannot be completed because the requested operation would conflict with an existing item. For example, a request that tries to create a duplicate item would create a conflict, though duplicate items are typically identified with more specific errors.",
-    duplicate:
-      "The requested operation failed because it tried to create a resource that already exists.",
-  }),
-  415: asStrings({
-    unsupportedMediaType:
+  },
+  UnsupportedMediaType: {
+    status: 415,
+    name: HttpStatusNames.UnsupportedMediaType,
+    message:
       "The content type of the request data or the content type of a part of a multipart request is not supported.",
-  }),
-  500: asStrings({
-    internalError: "The request failed due to an internal error.",
-  }),
-  503: asStrings({
-    backendError: "A backend error occurred.",
-    backendNotConnected: "The request failed due to a connection error.",
-    notReady: "The API server is not ready to accept requests.",
-  }),
-  520: asStrings({
-    unknownError: "An unknown error occurred.",
-  }),
+  },
+  InternalServerError: {
+    status: 500,
+    name: HttpStatusNames.InternalServerError,
+    message: "The request failed due to an internal server error.",
+  },
+  BadGateway: {
+    status: 502,
+    name: HttpStatusNames.BadGateway,
+    message:
+      "The request failed due to an invalid response by external API(s).",
+  },
+  ServiceUnavailable: {
+    status: 503,
+    name: HttpStatusNames.ServiceUnavailable,
+    message: "A backend error occurred.",
+  },
 }
