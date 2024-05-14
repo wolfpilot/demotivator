@@ -6,6 +6,7 @@ import * as controller from "@controllers/quotesController"
 
 // Schemas
 import {
+  quotesListSchema,
   quotesGetByIdSchema,
   quotesCreateSchema,
   quotesDeleteByIdSchema,
@@ -16,7 +17,11 @@ import { validate } from "@utils/validationHelper"
 
 const router = express.Router()
 
-router.get("/", asyncWrapper(controller.list))
+router.get(
+  "/",
+  validate({ query: quotesListSchema }),
+  asyncWrapper(controller.list)
+)
 router.post(
   "/",
   validate({ body: quotesCreateSchema }),
