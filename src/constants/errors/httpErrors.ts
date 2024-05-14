@@ -1,4 +1,3 @@
-// Utils
 export enum HttpStatusNames {
   // 400
   BadRequest = "BadRequest",
@@ -18,23 +17,20 @@ export enum HttpStatusNames {
   ServiceUnavailable = "ServiceUnavailable",
 }
 
-export interface HttpStatusCode {
-  name: HttpStatusNames
+export interface HttpError {
   status: number
+  name: HttpStatusNames
   message: string
 }
 
-export type HttpStatusCodes = Record<
-  keyof typeof HttpStatusNames,
-  HttpStatusCode
->
+export type HttpErrors = Record<keyof typeof HttpStatusNames, HttpError>
 
 /**
  * Shamelessly plugged from Google's Webmaster Tools v3 standard error responses documentation.
  *
  * @see https://developers.google.com/webmaster-tools/search-console-api-original/v3/errors
  */
-export const httpStatusCodes: HttpStatusCodes = {
+export const httpErrors: HttpErrors = {
   BadRequest: {
     status: 400,
     name: HttpStatusNames.BadRequest,

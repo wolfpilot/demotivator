@@ -1,4 +1,4 @@
-export interface IQuoteData {
+export interface QuoteData {
   id: number
   author?: string
   text: string

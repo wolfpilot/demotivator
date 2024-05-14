@@ -1,31 +1,38 @@
 // Types
-import { IPaginationData, IPaginationQueryResult, IApiError } from "@ts/api"
+import { ModelError } from "@ts/api"
 import {
-  ModelList,
+  ModelGetTotalRecords,
+  ModelGetByPage,
   ModelCreate,
   ModelGetById,
   ModelDeleteById,
-  IQuotesListQueryResult,
-  IQuotesCreateQueryResult,
-  IQuotesGetByIdQueryResult,
-  IQuotesDeleteByIdQueryResult,
+  QuotesGetTotalRecordsQueryResult,
+  QuotesGetByPageQueryResult,
+  QuotesCreateQueryResult,
+  QuotesGetByIdQueryResult,
+  QuotesDeleteByIdQueryResult,
 } from "./types"
 
 // Utils
 import { isRenderHost } from "@utils/envHelper"
 import { pool } from "@utils/dbHelper"
-import { HttpError } from "@utils/errorHelper"
+import { ValidationError, ServiceError } from "@utils/errorHelper"
 
 // Setup
-const MIN_LIMIT_RECORDS_PER_PAGE = 2
-const MAX_LIMIT_RECORDS_PER_PAGE = 100
-const MIN_CURRENT_PAGE = 1
+
+/**
+ * As opposed to other DB programming languages, SQL indexes always start at 1.
+ * We can use this simple check to avoid unnecessary DB queries.
+ *
+ * @see https://stackoverflow.com/questions/53631015/why-sql-primary-key-index-begin-at-1-and-not-at-0
+ */
+const MIN_SQL_RECORD_INDEX = 1
 
 // Utils
-const parseError = (err: unknown): Promise<IApiError> => {
+const parseError = (err: unknown): Promise<ModelError> => {
   /**
    * console.log() is synchronous and can slow down or even freeze servers
-   * if the stack is too long. Therefore it's best to disable it on production
+   * if the stack is too long. It's best to disable it on production
    * or use some async library.
    *
    * @see https://dev.to/adam_cyclones/consolelog-is-slow-2a2b
@@ -34,67 +41,43 @@ const parseError = (err: unknown): Promise<IApiError> => {
     console.error(err.message, err.stack)
   }
 
-  // Return known errors
-  if (err instanceof HttpError) {
-    return Promise.reject(err)
-  }
+  /**
+   * Additionally, here we can handle 3rd-party API errors such as PostgresQL:
+   *
+   * if (err instanceof Error) {
+   *   if (err.code === 24000) {
+   *     ... // Manually reset cursor
+   *   }
+   * }
+   *
+   * @see https://www.postgresql.org/docs/current/errcodes-appendix.html
+   */
 
-  // Avoid potential attacks by returning generic 500 errors for DB-related issues
-  return Promise.reject(new HttpError("InternalServerError"))
+  return Promise.reject(err)
 }
 
 // Functions
-/**
- *
- * @param limit - The amount of records to be fetched from the DB.
- * @param page - The index of the groupd of records being requested.
- */
-export const list: ModelList = async ({ limit, page }) => {
+export const getTotalRecords: ModelGetTotalRecords = async () => {
   try {
-    // Pagination
-    const countRes: IPaginationQueryResult = await pool.query(
+    const res: QuotesGetTotalRecordsQueryResult = await pool.query(
       `
       SELECT count(*) FROM quotes;
       `
     )
 
-    const totalRecords = countRes.rows[0].count
-    const totalPages = Math.ceil(totalRecords / limit)
+    const totalRecords = res.rows[0].count
 
-    const nextPage = page >= totalPages ? null : page + 1
-    const prevPage = page <= MIN_CURRENT_PAGE ? null : page - 1
+    return Promise.resolve({
+      data: totalRecords,
+    })
+  } catch (err: unknown) {
+    return parseError(err)
+  }
+}
 
-    /**
-     * As pagination only makes sense when fetching multiple items,
-     * "limit" must be constrained between 2 and an arbitrary max (i.e. 100).
-     */
-    if (
-      limit < MIN_LIMIT_RECORDS_PER_PAGE ||
-      limit > MAX_LIMIT_RECORDS_PER_PAGE
-    ) {
-      return Promise.reject(
-        new HttpError(
-          "BadRequest",
-          `Query param 'limit' is out of bounds (min ${MIN_LIMIT_RECORDS_PER_PAGE}, max ${MAX_LIMIT_RECORDS_PER_PAGE}).`
-        )
-      )
-    }
-
-    /**
-     * To ensure the page does not become negative, the "pageNumber" should
-     * have a minimum value of 1.
-     */
-    if (page < MIN_CURRENT_PAGE || page > totalPages) {
-      return Promise.reject(
-        new HttpError(
-          "BadRequest",
-          `Query param 'page' is out of bounds (min ${MIN_CURRENT_PAGE}, max ${totalPages}).`
-        )
-      )
-    }
-
-    // Data
-    const dataRes: IQuotesListQueryResult = await pool.query(
+export const getByPage: ModelGetByPage = async ({ limit, page }) => {
+  try {
+    const res: QuotesGetByPageQueryResult = await pool.query(
       `
       SELECT * FROM quotes
       ORDER BY id
@@ -104,17 +87,10 @@ export const list: ModelList = async ({ limit, page }) => {
       [limit, page]
     )
 
-    const paginationData: IPaginationData = {
-      totalRecords,
-      totalPages,
-      currentPage: page,
-      nextPage,
-      prevPage,
-    }
+    const quotes = res.rows?.length ? res.rows : null
 
     return Promise.resolve({
-      data: dataRes.rows,
-      pagination: paginationData,
+      data: quotes,
     })
   } catch (err: unknown) {
     return parseError(err)
@@ -123,7 +99,7 @@ export const list: ModelList = async ({ limit, page }) => {
 
 export const create: ModelCreate = async ({ author, text }) => {
   try {
-    const res: IQuotesCreateQueryResult = await pool.query(
+    const res: QuotesCreateQueryResult = await pool.query(
       `
       INSERT INTO quotes (author, text)
       VALUES ($1, $2)
@@ -135,13 +111,11 @@ export const create: ModelCreate = async ({ author, text }) => {
     const id = res.rows[0].id
 
     if (!id) {
-      return Promise.reject(new HttpError("Conflict"))
+      return Promise.reject(new ServiceError("Conflict"))
     }
 
     return Promise.resolve({
-      data: {
-        id: id.toString(),
-      },
+      data: id,
     })
   } catch (err: unknown) {
     return parseError(err)
@@ -149,14 +123,12 @@ export const create: ModelCreate = async ({ author, text }) => {
 }
 
 export const getById: ModelGetById = async ({ id }) => {
-  const idNum = parseInt(id, 10)
-
-  if (idNum < 1) {
-    return Promise.reject(new HttpError("BadRequest"))
+  if (id < MIN_SQL_RECORD_INDEX) {
+    return Promise.reject(new ValidationError("InvalidParameter"))
   }
 
   try {
-    const res: IQuotesGetByIdQueryResult = await pool.query(
+    const res: QuotesGetByIdQueryResult = await pool.query(
       `
       SELECT * FROM quotes
       WHERE id = $1;
@@ -164,27 +136,26 @@ export const getById: ModelGetById = async ({ id }) => {
       [id]
     )
 
-    if (!res.rows || !res.rows.length) {
-      return Promise.reject(new HttpError("NotFound"))
-    }
+    const quote = res.rows?.length ? res.rows[0] : null
 
-    return Promise.resolve({
-      data: res.rows[0],
-    })
+    return Promise.resolve({ data: quote })
   } catch (err: unknown) {
     return parseError(err)
   }
 }
 
 export const deleteById: ModelDeleteById = async ({ id }) => {
-  const idNum = parseInt(id, 10)
-
-  if (idNum < 1) {
-    return Promise.reject(new HttpError("BadRequest"))
+  if (id < MIN_SQL_RECORD_INDEX) {
+    return Promise.reject(
+      new ValidationError(
+        "InvalidParameter",
+        `Param 'id' is out of bounds (min ${MIN_SQL_RECORD_INDEX}).`
+      )
+    )
   }
 
   try {
-    const res: IQuotesDeleteByIdQueryResult = await pool.query(
+    const res: QuotesDeleteByIdQueryResult = await pool.query(
       `
       DELETE FROM quotes
       WHERE id = $1
@@ -193,11 +164,9 @@ export const deleteById: ModelDeleteById = async ({ id }) => {
       [id]
     )
 
-    if (!res.rowCount) {
-      return Promise.reject(new HttpError("NotFound"))
-    }
+    const isDeleted = !!res.rowCount
 
-    return Promise.resolve()
+    return Promise.resolve({ data: isDeleted })
   } catch (err: unknown) {
     return parseError(err)
   }

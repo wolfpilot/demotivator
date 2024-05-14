@@ -1,39 +1,48 @@
 import { QueryResult } from "pg"
 
 // Types
-import { IPaginationData, ModelResponse } from "@ts/api"
-import { IQuoteData } from "@ts/data/quotes"
+import { ModelResponse } from "@ts/api"
+import { QuoteData } from "@ts/data/quotes"
 
 // Queries
-export interface IQuotesListQueryResult extends QueryResult {
-  rows: IQuoteData[]
+export interface QuotesGetTotalRecordsQueryResult extends QueryResult {
+  rows: {
+    count: number
+  }[]
 }
 
-export interface IQuotesCreateQueryResult extends QueryResult {
+export interface QuotesGetByPageQueryResult extends QueryResult {
+  rows: QuoteData[]
+}
+
+export interface QuotesCreateQueryResult extends QueryResult {
   rows: {
     id: number
   }[]
 }
 
-export interface IQuotesGetByIdQueryResult extends QueryResult {
-  rows: IQuoteData[]
+export interface QuotesGetByIdQueryResult extends QueryResult {
+  rows: QuoteData[]
 }
 
-export interface IQuotesDeleteByIdQueryResult extends QueryResult {
-  rows: IQuoteData[]
+export interface QuotesDeleteByIdQueryResult extends QueryResult {
+  rows: QuoteData[]
 }
 
-// Results
-export type QuotesListResponse = ModelResponse<IQuoteData[], IPaginationData>
-export type QuotesCreateResponse = ModelResponse<{ id: string }>
-export type QuotesGetByIdResponse = ModelResponse<IQuoteData>
-export type QuotesDeleteByIdResponse = ModelResponse<void>
+// Responses
+export type QuotesGetTotalRecordsResponse = ModelResponse<number>
+export type QuotesGetByPageResponse = ModelResponse<QuoteData[] | null>
+export type QuotesCreateResponse = ModelResponse<number>
+export type QuotesGetByIdResponse = ModelResponse<QuoteData | null>
+export type QuotesDeleteByIdResponse = ModelResponse<boolean>
 
-// Requests
-export type ModelList = (args: {
+// Models
+export type ModelGetTotalRecords = () => Promise<QuotesGetTotalRecordsResponse>
+
+export type ModelGetByPage = (args: {
   limit: number
   page: number
-}) => Promise<QuotesListResponse>
+}) => Promise<QuotesGetByPageResponse>
 
 export type ModelCreate = (args: {
   author?: string
@@ -41,9 +50,9 @@ export type ModelCreate = (args: {
 }) => Promise<QuotesCreateResponse>
 
 export type ModelGetById = (args: {
-  id: string
+  id: number
 }) => Promise<QuotesGetByIdResponse>
 
 export type ModelDeleteById = (args: {
-  id: string
+  id: number
 }) => Promise<QuotesDeleteByIdResponse>

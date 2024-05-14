@@ -15,13 +15,13 @@ export const quotesListSchema: JSONSchema7 = {
     limit: {
       description: "The amount of records to be fetched from the DB.",
       type: "string",
-      pattern: "^[0-9]+$",
+      pattern: "^[1-9]\\d*$",
       minLength: 1,
     },
     page: {
       description: "The index of the group of records being requested.",
       type: "string",
-      pattern: "^[0-9]+$",
+      pattern: "^[1-9]\\d*$",
       minLength: 1,
     },
   },

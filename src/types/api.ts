@@ -1,9 +1,8 @@
 import * as core from "express-serve-static-core"
 import { Response } from "express"
-import { QueryResult } from "pg"
 
 // Types
-import { HttpError } from "@utils/errorHelper"
+import { HttpError, ValidationError, ServiceError } from "@utils/errorHelper"
 
 /**
  * Re-export Express Request generics for easier extension.
@@ -25,13 +24,7 @@ export type ReqBody = unknown
 export type Params = core.ParamsDictionary
 export type Query = core.Query
 
-export interface IPaginationQueryResult extends QueryResult {
-  rows: {
-    count: number
-  }[]
-}
-
-export interface IPaginationData {
+export interface PaginationData {
   totalRecords: number
   totalPages: number
   currentPage: number
@@ -39,22 +32,25 @@ export interface IPaginationData {
   prevPage: number | null
 }
 
-// API Status
-export type IApiError = HttpError // | ValidationError | ...others
+// API
+export type ApiError = HttpError
 
-export interface ModelSuccess<T = void, K = void> {
+export interface ApiSuccess<T = void, K = void> {
+  success: boolean
+  message?: string
   data?: T
   pagination?: K
 }
 
-export type ModelResponse<T = void, K = void> =
-  | ModelSuccess<T, K>
-  | IApiError
-  | void
+export type ApiResponse<T = void, K = void> = Response<
+  ApiSuccess<T, K> | ApiError
+>
 
-export interface IApiSuccess<T = void, K = void> extends ModelSuccess<T, K> {
-  success: boolean
-  message?: string
+// Model
+export type ModelError = ValidationError | ServiceError
+
+export interface ModelSuccess<T> {
+  data: T
 }
 
-export type ApiResponse<T = void, K = void> = Response<IApiSuccess<T, K>>
+export type ModelResponse<T> = ModelSuccess<T> | ModelError

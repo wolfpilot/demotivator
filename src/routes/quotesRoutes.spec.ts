@@ -57,17 +57,17 @@ describe("GET /quotes", () => {
     const res1 = await req(app).get("/quotes?limit=0")
     expect(res1.status).toBe(400)
 
-    const res2 = await req(app).get("/quotes?limit=500")
+    const res2 = await req(app).get("/quotes?page=0")
     expect(res2.status).toBe(400)
 
-    const res3 = await req(app).get("/quotes?page=0")
-    expect(res3.status).toBe(400)
+    const res3 = await req(app).get("/quotes?limit=500")
+    expect(res3.status).toBe(404)
 
     const res4 = await req(app).get("/quotes?page=100")
-    expect(res4.status).toBe(400)
+    expect(res4.status).toBe(404)
 
     const res5 = await req(app).get("/quotes?limit=5&page=3")
-    expect(res5.status).toBe(400)
+    expect(res5.status).toBe(404)
   })
 })
 
@@ -83,7 +83,7 @@ describe("POST /quotes", () => {
     expect(resQuotesCreate.status).toBe(201)
 
     const resQuotesGetById = await req(app).get(
-      `/quotes/${resQuotesCreate.body.data.id}`
+      `/quotes/${resQuotesCreate.body.data}`
     )
     expect(resQuotesGetById.status).toBe(200)
     expect(resQuotesGetById.body.data.author).toEqual(mockData.author)
@@ -101,7 +101,7 @@ describe("POST /quotes", () => {
     expect(resQuotesCreate.status).toBe(201)
 
     const resQuotesGetById = await req(app).get(
-      `/quotes/${resQuotesCreate.body.data.id}`
+      `/quotes/${resQuotesCreate.body.data}`
     )
     expect(resQuotesGetById.status).toBe(200)
     expect(resQuotesGetById.body.data.author).toEqual(mockData.author)

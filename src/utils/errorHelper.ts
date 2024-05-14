@@ -1,7 +1,17 @@
 import { CustomError } from "ts-custom-error"
 
 // Constants
-import { HttpStatusNames, httpStatusCodes } from "@constants/http"
+import { HttpStatusNames, httpErrors } from "@constants/errors/httpErrors"
+import {
+  VALIDATION_ERROR_NAME,
+  ValidationErrorReasons,
+  validationErrors,
+} from "@constants/errors/validationErrors"
+import {
+  SERVICE_ERROR_NAME,
+  ServiceErrorReasons,
+  serviceErrors,
+} from "@root/src/constants/errors/serviceErrors"
 
 /**
  * Default is set to 500 Internal Server Error.
@@ -13,11 +23,9 @@ import { HttpStatusNames, httpStatusCodes } from "@constants/http"
  */
 export class HttpError extends CustomError {
   public success: boolean
-  public status: number
-  public message: string
 
   constructor(name: keyof typeof HttpStatusNames, message?: string) {
-    const code = httpStatusCodes[name]
+    const code = httpErrors[name]
 
     super()
 
@@ -27,12 +35,48 @@ export class HttpError extends CustomError {
      * @see https://github.com/adriengibrat/ts-custom-error/issues/53#issuecomment-679403993
      */
     Object.defineProperty(this, "name", {
-      value: code.name || httpStatusCodes.InternalServerError.name,
+      value: code.name || httpErrors.InternalServerError.name,
     })
 
     this.success = false
-    this.status = code.status || httpStatusCodes.InternalServerError.status
     this.message =
-      message || code.message || httpStatusCodes.InternalServerError.message
+      message || code.message || httpErrors.InternalServerError.message
+  }
+}
+
+export class ValidationError extends CustomError {
+  public reason: keyof typeof ValidationErrorReasons
+
+  constructor(reason: keyof typeof ValidationErrorReasons, message?: string) {
+    const errorType = validationErrors[reason]
+
+    super()
+
+    Object.defineProperty(this, "name", {
+      value: VALIDATION_ERROR_NAME,
+    })
+
+    this.reason =
+      reason || errorType.reason || validationErrors.Unhandled.reason
+    this.message =
+      message || errorType.message || validationErrors.Unhandled.message
+  }
+}
+
+export class ServiceError extends CustomError {
+  public reason: keyof typeof ServiceErrorReasons
+
+  constructor(reason: keyof typeof ServiceErrorReasons, message?: string) {
+    const errorType = serviceErrors[reason]
+
+    super()
+
+    Object.defineProperty(this, "name", {
+      value: SERVICE_ERROR_NAME,
+    })
+
+    this.reason = reason || errorType.reason || serviceErrors.Unhandled.reason
+    this.message =
+      message || errorType.message || serviceErrors.Unhandled.message
   }
 }

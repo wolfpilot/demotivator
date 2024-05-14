@@ -1,43 +1,24 @@
-import { Request, NextFunction } from "express"
-
 // Types
-import { isApiError } from "@ts/typeGuards"
-import { Params, ResBody, IPaginationData, ApiResponse } from "@ts/api"
-import { IQuoteData } from "@ts/data/quotes"
+import {
+  ControllerList,
+  ControllerCreate,
+  ControllerGetById,
+  ControllerDeleteById,
+} from "./types"
 
 // Utils
-import { HttpError } from "@utils/errorHelper"
+import { HttpError, ValidationError, ServiceError } from "@utils/errorHelper"
 
 // Models
 import * as QuotesModel from "@models/quotesModel"
 
-// Requests
-type QuotesCreateRequest = Request<
-  Params,
-  ResBody,
-  {
-    author?: string
-    text: string
-  }
->
-
-export type QuotesGetByIdRequest = Request<{
-  id: string
-}>
-
-export type QuotesDeleteByIdRequest = Request<{
-  id: string
-}>
-
-// Responses
-export type QuotesListResponse = ApiResponse<IQuoteData[], IPaginationData>
-export type QuotesCreateResponse = ApiResponse<{ id: string }>
-export type QuotesGetByIdResponse = ApiResponse<IQuoteData>
-export type QuotesDeleteByIdResponse = ApiResponse<void>
-
 // Setup
 const DEFAULT_RECORDS_PER_PAGE = "10"
 const DEFAULT_PAGE_NUMBER = "1"
+
+const MIN_LIMIT_RECORDS_PER_PAGE = 2
+const MAX_LIMIT_RECORDS_PER_PAGE = 100
+const MIN_CURRENT_PAGE = 1
 
 /**
  * ?: Why explicit return at the end of functions?
@@ -45,116 +26,208 @@ const DEFAULT_PAGE_NUMBER = "1"
  * Because otherwise TypeScript doesn't check the return values
  * making it more or less useless validating the promise.
  */
-export const list = async (
-  req: Request,
-  res: QuotesListResponse,
-  next: NextFunction
-): Promise<QuotesListResponse | void> => {
+export const list: ControllerList = async (req, res, next) => {
   const {
     limit = DEFAULT_RECORDS_PER_PAGE,
     page = DEFAULT_PAGE_NUMBER,
   } = req.query
 
-  // Check if string
-  if (typeof limit !== "string" || typeof page !== "string") {
-    return next(
-      new HttpError("BadRequest", "Query params must to be of type string.")
-    )
-  }
-
-  // Coerce to numbers
   const parsedLimit = parseInt(limit, 10)
   const parsedPage = parseInt(page, 10)
 
-  // Exclude NaN
-  if (Number.isNaN(parsedLimit) || Number.isNaN(parsedPage)) {
-    return next(
-      new HttpError(
-        "BadRequest",
-        "Query params must be convertible to numbers."
+  try {
+    const totalRecordsPayload = await QuotesModel.getTotalRecords()
+
+    if (
+      totalRecordsPayload instanceof ValidationError ||
+      totalRecordsPayload instanceof ServiceError
+    ) {
+      return next(new HttpError("InternalServerError"))
+    }
+
+    const totalRecords = totalRecordsPayload?.data
+
+    if (!totalRecords) {
+      return next(new HttpError("NotFound"))
+    }
+
+    const totalPages = Math.ceil(totalRecords / parsedLimit)
+
+    /**
+     * As pagination only makes sense when fetching multiple items,
+     * "limit" must be constrained between 2 and an arbitrary max (i.e. 100).
+     */
+    if (
+      parsedLimit < MIN_LIMIT_RECORDS_PER_PAGE ||
+      parsedLimit > MAX_LIMIT_RECORDS_PER_PAGE
+    ) {
+      return next(
+        new HttpError(
+          "NotFound",
+          `Query param 'limit' is out of bounds (min ${MIN_LIMIT_RECORDS_PER_PAGE}, max ${MAX_LIMIT_RECORDS_PER_PAGE}).`
+        )
       )
-    )
+    }
+
+    /**
+     * To ensure the page does not become negative, the "pageNumber" should
+     * have a minimum value of 1.
+     */
+    if (parsedPage < MIN_CURRENT_PAGE || parsedPage > totalPages) {
+      return next(
+        new HttpError(
+          "NotFound",
+          `Query param 'page' is out of bounds (min ${MIN_CURRENT_PAGE}, max ${totalPages}).`
+        )
+      )
+    }
+
+    const reqQuotesOptions = {
+      limit: parseInt(limit, 10),
+      page: parseInt(page, 10),
+    }
+
+    const quotesPayload = await QuotesModel.getByPage(reqQuotesOptions)
+
+    if (
+      quotesPayload instanceof ValidationError ||
+      quotesPayload instanceof ServiceError
+    ) {
+      return next(new HttpError("InternalServerError"))
+    }
+
+    const quotes = quotesPayload?.data
+
+    if (!quotes) {
+      return next(new HttpError("NotFound"))
+    }
+
+    const nextPage = parsedPage >= totalPages ? null : parsedPage + 1
+    const prevPage = parsedPage <= MIN_CURRENT_PAGE ? null : parsedPage - 1
+
+    const paginationData = {
+      totalRecords,
+      totalPages,
+      currentPage: parsedPage,
+      nextPage,
+      prevPage,
+    }
+
+    return res.status(200).json({
+      data: quotes,
+      pagination: paginationData,
+      success: true,
+    })
+  } catch (err: unknown) {
+    if (err instanceof ValidationError) {
+      return next(new HttpError("BadRequest"))
+    }
+
+    next(new HttpError("InternalServerError"))
   }
-
-  const payload = await QuotesModel.list({
-    limit: parsedLimit,
-    page: parsedPage,
-  })
-
-  if (payload instanceof HttpError) {
-    return next(new HttpError("BadGateway", "Could not list quotes."))
-  }
-
-  if (!payload || !payload.data) {
-    return next(new HttpError("BadGateway", "Could not list quotes."))
-  }
-
-  return res.status(200).json({
-    ...payload,
-    success: true,
-  })
 }
 
-export const create = async (
-  req: QuotesCreateRequest,
-  res: QuotesCreateResponse,
-  next: NextFunction
-): Promise<QuotesCreateResponse | void> => {
+export const create: ControllerCreate = async (req, res, next) => {
   const { author, text } = req.body
 
-  const payload = await QuotesModel.create({
+  const reqOptions = {
     author,
     text,
-  })
-
-  if (isApiError(payload)) {
-    return next(new HttpError("BadGateway", "Could not create quote."))
   }
 
-  if (!payload || !payload.data) {
-    return next(new HttpError("BadGateway", "Could not return new quote ID."))
-  }
+  try {
+    const payload = await QuotesModel.create(reqOptions)
 
-  return res.status(201).json({
-    ...payload,
-    success: true,
-    message: `Quote added with ID ${payload.data.id}`,
-  })
+    if (payload instanceof ValidationError || payload instanceof ServiceError) {
+      return next(new HttpError("InternalServerError"))
+    }
+
+    const quoteID = payload?.data
+
+    if (!quoteID) {
+      return next(new HttpError("BadGateway"))
+    }
+
+    return res.status(201).json({
+      data: quoteID,
+      success: true,
+      message: `Quote added with ID ${quoteID}`,
+    })
+  } catch (err: unknown) {
+    if (err instanceof ServiceError) {
+      if (err.reason === "Conflict") {
+        return next(new HttpError("Conflict"))
+      }
+    } else if (err instanceof ValidationError) {
+      return next(new HttpError("BadRequest"))
+    }
+
+    next(new HttpError("InternalServerError"))
+  }
 }
 
-export const getById = async (
-  req: QuotesGetByIdRequest,
-  res: QuotesGetByIdResponse,
-  next: NextFunction
-): Promise<QuotesGetByIdResponse | void> => {
+export const getById: ControllerGetById = async (req, res, next) => {
   const { id } = req.params
 
-  const payload = await QuotesModel.getById({
-    id,
-  })
-
-  if (!payload) {
-    return next(new HttpError("NotFound", "Could not get quote by ID."))
+  const reqOptions = {
+    id: parseInt(id, 10),
   }
 
-  return res.status(200).json({
-    ...payload,
-    success: true,
-  })
+  try {
+    const payload = await QuotesModel.getById(reqOptions)
+
+    if (payload instanceof ValidationError || payload instanceof ServiceError) {
+      return next(new HttpError("InternalServerError"))
+    }
+
+    const quote = payload?.data
+
+    if (!quote) {
+      return next(new HttpError("NotFound"))
+    }
+
+    return res.status(200).json({
+      data: quote,
+      success: true,
+    })
+  } catch (err: unknown) {
+    if (err instanceof ValidationError) {
+      return next(new HttpError("BadRequest", err.message))
+    }
+
+    next(new HttpError("InternalServerError"))
+  }
 }
 
-export const deleteById = async (
-  req: QuotesDeleteByIdRequest,
-  res: QuotesDeleteByIdResponse
-): Promise<QuotesDeleteByIdResponse | void> => {
+export const deleteById: ControllerDeleteById = async (req, res, next) => {
   const { id } = req.params
 
-  await QuotesModel.deleteById({
-    id,
-  })
+  const reqOptions = {
+    id: parseInt(id, 10),
+  }
 
-  return res.status(204).json({
-    success: true,
-    message: `Quote deleted with ID ${id}`,
-  })
+  try {
+    const payload = await QuotesModel.deleteById(reqOptions)
+
+    if (payload instanceof ValidationError || payload instanceof ServiceError) {
+      return next(new HttpError("InternalServerError"))
+    }
+
+    const isDeleted = payload?.data
+
+    if (!isDeleted) {
+      return next(new HttpError("NotFound"))
+    }
+
+    return res.status(204).json({
+      success: true,
+      message: `Quote deleted with ID ${id}`,
+    })
+  } catch (err: unknown) {
+    if (err instanceof ValidationError) {
+      return next(new HttpError("BadRequest", err.message))
+    }
+
+    next(new HttpError("InternalServerError"))
+  }
 }
