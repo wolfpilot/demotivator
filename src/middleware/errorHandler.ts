@@ -1,49 +1,34 @@
 import { Request, Response, NextFunction } from "express"
 
-// Types
-import { HttpStatusCodes, IApiError } from "@ts/api"
-
 // Constants
-import { httpStatusMessages } from "@constants/http"
+import { httpErrors, HttpStatusNames } from "@constants/errors/httpErrors"
 
 // Utils
 import { HttpError } from "@utils/errorHelper"
 
 export const errorHandler = (
-  err: IApiError,
+  err: HttpError,
   _req: Request,
-  res: Response<IApiError>,
+  res: Response<HttpError>,
   next: NextFunction
 ): void => {
   // Delegate to the default Express error handler
   // if the headers have already been sent
   if (res.headersSent) return next(err)
 
-  const { status, code, message } = err
+  const errName = err.name as HttpStatusNames
 
-  if (status && code && message) {
-    res.status(status).json({
-      success: false,
-      status,
-      code,
-      message,
-    })
-
-    return next(new HttpError(err))
+  if (err instanceof HttpError) {
+    res.status(httpErrors[errName].status).json(err)
+    return next(err)
   }
 
-  res.status(500).json({
+  const internalServerError = {
     success: false,
-    status: 500,
-    code: HttpStatusCodes.InternalError,
-    message: httpStatusMessages[500].internalError,
-  })
+    name: httpErrors.InternalServerError.name,
+    message: httpErrors.InternalServerError.message,
+  }
 
-  next(
-    new HttpError({
-      status: 500,
-      code: HttpStatusCodes.InternalError,
-      message: httpStatusMessages[500].internalError,
-    })
-  )
+  res.status(httpErrors.InternalServerError.status).json(internalServerError)
+  next(new HttpError("InternalServerError"))
 }

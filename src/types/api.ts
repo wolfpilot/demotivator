@@ -1,30 +1,8 @@
 import * as core from "express-serve-static-core"
 import { Response } from "express"
-import { QueryResult } from "pg"
 
-export enum HttpStatusCodes {
-  // 400
-  BadRequest = "badRequest",
-  Invalid = "invalid",
-  ParseError = "parseError",
-  Required = "required",
-  UnknownApi = "unknownApi",
-  // 404
-  NotFound = "notFound",
-  // 409
-  Conflict = "conflict",
-  Duplicate = "duplicate",
-  // 415
-  UnsupportedMediaType = "unsupportedMediaType",
-  // 500
-  InternalError = "internalError",
-  // 503
-  BackendError = "backendError",
-  BackendNotConnected = "backendNotConnected",
-  NotReady = "notReady",
-  // 520
-  UnknownError = "unknownError",
-}
+// Types
+import { HttpError, ValidationError, ServiceError } from "@utils/errorHelper"
 
 /**
  * Re-export Express Request generics for easier extension.
@@ -41,20 +19,12 @@ export enum HttpStatusCodes {
  *   Query
  * >
  */
+export type ResBody = unknown
+export type ReqBody = unknown
 export type Params = core.ParamsDictionary
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export type ResBody = any
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export type ReqBody = any
 export type Query = core.Query
 
-export interface IPaginationQueryResult extends QueryResult {
-  rows: {
-    count: number
-  }[]
-}
-
-export interface IPaginationData {
+export interface PaginationData {
   totalRecords: number
   totalPages: number
   currentPage: number
@@ -62,25 +32,25 @@ export interface IPaginationData {
   prevPage: number | null
 }
 
-// API Status
-export interface IApiSuccess<T, K> {
+// API
+export type ApiError = HttpError
+
+export interface ApiSuccess<T = void, K = void> {
   success: boolean
-  status: number
+  message?: string
   data?: T
   pagination?: K
-  message?: string
 }
 
-export interface IApiError {
-  success: boolean
-  status: number
-  code: HttpStatusCodes
-  message: string
-}
-
-export type ApiPromise<T = void, K = void> = Promise<
-  IApiSuccess<T, K> | IApiError
->
 export type ApiResponse<T = void, K = void> = Response<
-  IApiSuccess<T, K> | IApiError
+  ApiSuccess<T, K> | ApiError
 >
+
+// Model
+export type ModelError = ValidationError | ServiceError
+
+export interface ModelSuccess<T> {
+  data: T
+}
+
+export type ModelResponse<T> = ModelSuccess<T> | ModelError

@@ -1,132 +1,83 @@
-import { QueryResult } from "pg"
-
 // Types
+import { ModelError } from "@ts/api"
 import {
-  HttpStatusCodes,
-  ApiPromise,
-  IPaginationData,
-  IPaginationQueryResult,
-} from "@ts/api"
-import { IQuoteData } from "@ts/data/quotes"
+  ModelGetTotalRecords,
+  ModelGetByPage,
+  ModelCreate,
+  ModelGetById,
+  ModelDeleteById,
+  QuotesGetTotalRecordsQueryResult,
+  QuotesGetByPageQueryResult,
+  QuotesCreateQueryResult,
+  QuotesGetByIdQueryResult,
+  QuotesDeleteByIdQueryResult,
+} from "./types"
 
 // Utils
+import { isRenderHost } from "@utils/envHelper"
 import { pool } from "@utils/dbHelper"
-
-// Constants
-import { httpStatusMessages } from "@constants/http"
-
-// Queries
-export interface IQuotesListQueryResult extends QueryResult {
-  rows: IQuoteData[]
-}
-
-export interface IQuotesCreateQueryResult extends QueryResult {
-  rows: {
-    id: number
-  }[]
-}
-
-export interface IQuotesGetByIdQueryResult extends QueryResult {
-  rows: IQuoteData[]
-}
-
-export interface IQuotesDeleteByIdQueryResult extends QueryResult {
-  rows: IQuoteData[]
-}
-
-// Results
-export type QuotesListResponse = ApiPromise<IQuoteData[], IPaginationData>
-export type QuotesCreateResponse = ApiPromise<{
-  id: string
-}>
-export type QuotesGetByIdResponse = ApiPromise<IQuoteData>
-export type QuotesDeleteByIdResponse = ApiPromise
+import { ValidationError, ServiceError } from "@utils/errorHelper"
 
 // Setup
-const MIN_LIMIT_RECORDS_PER_PAGE = 2
-const MAX_LIMIT_RECORDS_PER_PAGE = 100
-const MIN_CURRENT_PAGE = 1
+
+/**
+ * As opposed to other DB programming languages, SQL indexes always start at 1.
+ * We can use this simple check to avoid unnecessary DB queries.
+ *
+ * @see https://stackoverflow.com/questions/53631015/why-sql-primary-key-index-begin-at-1-and-not-at-0
+ */
+const MIN_SQL_RECORD_INDEX = 1
 
 // Utils
-const parseError = (err: unknown) => {
-  if (err instanceof Error) {
+const parseError = (err: unknown): Promise<ModelError> => {
+  /**
+   * console.log() is synchronous and can slow down or even freeze servers
+   * if the stack is too long. It's best to disable it on production
+   * or use some async library.
+   *
+   * @see https://dev.to/adam_cyclones/consolelog-is-slow-2a2b
+   */
+  if (err instanceof Error && !isRenderHost) {
     console.error(err.message, err.stack)
-
-    return Promise.reject({
-      success: false,
-      status: 503,
-      code: HttpStatusCodes.BackendError,
-      message: httpStatusMessages[503].backendError,
-    })
   }
 
-  return Promise.reject({
-    success: false,
-    status: 520,
-    code: HttpStatusCodes.UnknownError,
-    message: httpStatusMessages[520].unknownError,
-  })
+  /**
+   * Additionally, here we can handle 3rd-party API errors such as PostgresQL:
+   *
+   * if (err instanceof Error) {
+   *   if (err.code === 24000) {
+   *     ... // Manually reset cursor
+   *   }
+   * }
+   *
+   * @see https://www.postgresql.org/docs/current/errcodes-appendix.html
+   */
+
+  return Promise.reject(err)
 }
 
 // Functions
-/**
- *
- * @param limit - The amount of records to be fetched from the DB.
- * @param page - The index of the groupd of records being requested.
- */
-export const list = async ({
-  limit,
-  page,
-}: {
-  limit: number
-  page: number
-}): Promise<QuotesListResponse> => {
+export const getTotalRecords: ModelGetTotalRecords = async () => {
   try {
-    // Pagination
-    const countRes: IPaginationQueryResult = await pool.query(
+    const res: QuotesGetTotalRecordsQueryResult = await pool.query(
       `
       SELECT count(*) FROM quotes;
       `
     )
 
-    const totalRecords = countRes.rows[0].count
-    const totalPages = Math.ceil(totalRecords / limit)
+    const totalRecords = res.rows[0].count
 
-    const nextPage = page >= totalPages ? null : page + 1
-    const prevPage = page <= MIN_CURRENT_PAGE ? null : page - 1
+    return Promise.resolve({
+      data: totalRecords,
+    })
+  } catch (err: unknown) {
+    return parseError(err)
+  }
+}
 
-    /**
-     * As pagination only makes sense when fetching multiple items,
-     * "limit" must be constrained between 2 and an arbitrary max (i.e. 100).
-     */
-
-    if (
-      limit < MIN_LIMIT_RECORDS_PER_PAGE ||
-      limit > MAX_LIMIT_RECORDS_PER_PAGE
-    ) {
-      return Promise.reject({
-        success: false,
-        status: 400,
-        code: HttpStatusCodes.BadRequest,
-        message: `Query param 'limit' is out of bounds (min ${MIN_LIMIT_RECORDS_PER_PAGE}, max ${MAX_LIMIT_RECORDS_PER_PAGE}).`,
-      })
-    }
-
-    /**
-     * To ensure the page does not become negative, the "pageNumber" should
-     * have a minimum value of 1.
-     */
-    if (page < MIN_CURRENT_PAGE || page > totalPages) {
-      return Promise.reject({
-        success: false,
-        status: 400,
-        code: HttpStatusCodes.BadRequest,
-        message: `Query param 'page' is out of bounds (min ${MIN_CURRENT_PAGE}, max ${totalPages}).`,
-      })
-    }
-
-    // Data
-    const dataRes: IQuotesListQueryResult = await pool.query(
+export const getByPage: ModelGetByPage = async ({ limit, page }) => {
+  try {
+    const res: QuotesGetByPageQueryResult = await pool.query(
       `
       SELECT * FROM quotes
       ORDER BY id
@@ -136,34 +87,19 @@ export const list = async ({
       [limit, page]
     )
 
-    const paginationData: IPaginationData = {
-      totalRecords,
-      totalPages,
-      currentPage: page,
-      nextPage,
-      prevPage,
-    }
+    const quotes = res.rows?.length ? res.rows : null
 
     return Promise.resolve({
-      success: true,
-      status: 204,
-      data: dataRes.rows,
-      pagination: paginationData,
+      data: quotes,
     })
   } catch (err: unknown) {
     return parseError(err)
   }
 }
 
-export const create = async ({
-  author,
-  text,
-}: {
-  author?: string
-  text: string
-}): Promise<QuotesCreateResponse> => {
+export const create: ModelCreate = async ({ author, text }) => {
   try {
-    const res: IQuotesCreateQueryResult = await pool.query(
+    const res: QuotesCreateQueryResult = await pool.query(
       `
       INSERT INTO quotes (author, text)
       VALUES ($1, $2)
@@ -175,44 +111,24 @@ export const create = async ({
     const id = res.rows[0].id
 
     if (!id) {
-      return Promise.reject({
-        success: false,
-        status: 409,
-        code: HttpStatusCodes.Conflict,
-        message: httpStatusMessages[409].conflict,
-      })
+      return Promise.reject(new ServiceError("Conflict"))
     }
 
     return Promise.resolve({
-      success: true,
-      status: 204,
-      data: {
-        id: id.toString(),
-      },
+      data: id,
     })
   } catch (err: unknown) {
     return parseError(err)
   }
 }
 
-export const getById = async ({
-  id,
-}: {
-  id: string
-}): Promise<QuotesGetByIdResponse> => {
-  const idNum = parseInt(id, 10)
-
-  if (idNum < 1) {
-    return Promise.reject({
-      success: false,
-      status: 400,
-      code: HttpStatusCodes.BadRequest,
-      message: httpStatusMessages[400].badRequest,
-    })
+export const getById: ModelGetById = async ({ id }) => {
+  if (id < MIN_SQL_RECORD_INDEX) {
+    return Promise.reject(new ValidationError("InvalidParameter"))
   }
 
   try {
-    const res: IQuotesGetByIdQueryResult = await pool.query(
+    const res: QuotesGetByIdQueryResult = await pool.query(
       `
       SELECT * FROM quotes
       WHERE id = $1;
@@ -220,43 +136,26 @@ export const getById = async ({
       [id]
     )
 
-    if (!res.rows || !res.rows.length) {
-      return Promise.reject({
-        success: false,
-        status: 404,
-        code: HttpStatusCodes.NotFound,
-        message: httpStatusMessages[404].notFound,
-      })
-    }
+    const quote = res.rows?.length ? res.rows[0] : null
 
-    return Promise.resolve({
-      success: true,
-      status: 204,
-      data: res.rows[0],
-    })
+    return Promise.resolve({ data: quote })
   } catch (err: unknown) {
     return parseError(err)
   }
 }
 
-export const deleteById = async ({
-  id,
-}: {
-  id: string
-}): Promise<QuotesDeleteByIdResponse> => {
-  const idNum = parseInt(id, 10)
-
-  if (idNum < 1) {
-    return Promise.reject({
-      success: false,
-      status: 400,
-      code: HttpStatusCodes.BadRequest,
-      message: httpStatusMessages[400].badRequest,
-    })
+export const deleteById: ModelDeleteById = async ({ id }) => {
+  if (id < MIN_SQL_RECORD_INDEX) {
+    return Promise.reject(
+      new ValidationError(
+        "InvalidParameter",
+        `Param 'id' is out of bounds (min ${MIN_SQL_RECORD_INDEX}).`
+      )
+    )
   }
 
   try {
-    const res: IQuotesDeleteByIdQueryResult = await pool.query(
+    const res: QuotesDeleteByIdQueryResult = await pool.query(
       `
       DELETE FROM quotes
       WHERE id = $1
@@ -265,19 +164,9 @@ export const deleteById = async ({
       [id]
     )
 
-    if (!res.rowCount) {
-      return Promise.reject({
-        success: false,
-        status: 404,
-        code: HttpStatusCodes.NotFound,
-        message: httpStatusMessages[404].notFound,
-      })
-    }
+    const isDeleted = !!res.rowCount
 
-    return Promise.resolve({
-      success: true,
-      status: 204,
-    })
+    return Promise.resolve({ data: isDeleted })
   } catch (err: unknown) {
     return parseError(err)
   }

@@ -23,7 +23,6 @@
     "lint": "eslint -f stylish \"**/*.ts\""
   },
   "dependencies": {
-    "@myrotvorets/express-async-middleware-wrapper": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv-flow": "^3.2.0",
     "esm": "^3.2.25",

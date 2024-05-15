@@ -1,7 +1,9 @@
 import { PoolConfig } from "pg"
 
+// Utils
+import { isRenderHost } from "@utils/envHelper"
+
 const {
-  RENDER,
   PG_USER,
   PG_HOST,
   PG_DATABASE,
@@ -9,8 +11,6 @@ const {
   PG_PASSWORD,
   PG_PORT,
 } = process.env
-
-const isRenderHost = !!RENDER
 
 export const config: PoolConfig = isRenderHost
   ? {
