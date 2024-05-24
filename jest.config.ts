@@ -22,6 +22,17 @@ const config: Config.InitialOptions = {
   },
   transform: {},
   moduleNameMapper: {
+    /**
+     * Force module uuid to resolve with the CJS entry point,
+     * because Jest does not support package.json.exports.
+     *
+     * @see https://github.com/uuidjs/uuid/issues/451
+     */
+    "drizzle-orm/node-postgres": require.resolve("drizzle-orm/node-postgres"),
+    "drizzle-orm/pg-core": require.resolve("drizzle-orm/pg-core"),
+    /**
+     * Alias common paths for quick importing
+     */
     "^@root/(.*)$": resolve(__dirname, "./$1"),
     "^@src/(.*)$": resolve(__dirname, "./src/$1"),
     "^@config/(.*)$": resolve(__dirname, "./src/config/$1"),

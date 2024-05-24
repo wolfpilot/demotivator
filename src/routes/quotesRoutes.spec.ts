@@ -1,6 +1,7 @@
 import req from "supertest"
 import fs from "fs"
 import path from "path"
+import { sql } from "drizzle-orm"
 
 // Express
 import app from "@src/app"
@@ -8,25 +9,33 @@ import app from "@src/app"
 // Data
 import { quotesMockData, quotesMockPagination } from "@mocks/quotesMock"
 
-// Utils
-import { pool } from "@utils/dbHelper"
+// Database
+import { quotes } from "@database/schema"
+import { quotesSeedData } from "@database/seeds/quotesSeed"
 
-const sql = fs
-  .readFileSync(path.resolve(__dirname, "../database/seeds/quotesSeed.sql"))
+// Utils
+import { pool, db } from "@utils/dbHelper"
+
+const generatedSql = fs
+  .readFileSync(
+    path.resolve(__dirname, "../database/migrations/0000_harsh_zaladane.sql")
+  )
   .toString()
 
 beforeEach(async () => {
-  await pool.query(sql)
+  await db.execute(sql.raw(`${generatedSql}`))
+  await db.insert(quotes).values(quotesSeedData)
 })
 
 afterEach(async () => {
-  await pool.query("DROP TABLE IF EXISTS quotes;")
+  await db.execute(sql`DROP TABLE IF EXISTS quotes;`)
 })
 
 afterAll(async () => {
   /**
    * Fix Jest not exiting after test suite is completed
    *
+   * @see https://github.com/drizzle-team/drizzle-orm/issues/1744
    * @see https://github.com/facebook/jest/issues/7287
    */
   pool.end()
@@ -45,7 +54,7 @@ describe("GET /quotes", () => {
     expect(res.status).toBe(200)
     expect(res.body.data).toEqual([quotesMockData[6], quotesMockData[7]])
     expect(res.body.pagination).toEqual({
-      totalRecords: "10",
+      totalRecords: 10,
       totalPages: 5,
       currentPage: 4,
       nextPage: 5,

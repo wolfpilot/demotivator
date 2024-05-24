@@ -1,8 +1,5 @@
 import dotenvFlow from "dotenv-flow"
-
-dotenvFlow.config({
-  node_env: process.env.NODE_ENV || "development",
-})
+dotenvFlow.config()
 
 // Server
 import app from "@src/app"

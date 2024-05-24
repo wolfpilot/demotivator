@@ -11,7 +11,7 @@ import {
   SERVICE_ERROR_NAME,
   ServiceErrorReasons,
   serviceErrors,
-} from "@root/src/constants/errors/serviceErrors"
+} from "@constants/errors/serviceErrors"
 
 /**
  * Default is set to 500 Internal Server Error.

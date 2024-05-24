@@ -1,3 +1,5 @@
+import { count, eq } from "drizzle-orm"
+
 // Types
 import { ModelError } from "@ts/api"
 import {
@@ -15,8 +17,11 @@ import {
 
 // Utils
 import { isRenderHost } from "@utils/envHelper"
-import { pool } from "@utils/dbHelper"
+import { db } from "@utils/dbHelper"
 import { ValidationError, ServiceError } from "@utils/errorHelper"
+
+// Schemas
+import { quotes } from "@database/schema"
 
 // Setup
 
@@ -59,16 +64,14 @@ const parseError = (err: unknown): Promise<ModelError> => {
 // Functions
 export const getTotalRecords: ModelGetTotalRecords = async () => {
   try {
-    const res: QuotesGetTotalRecordsQueryResult = await pool.query(
-      `
-      SELECT count(*) FROM quotes;
-      `
-    )
+    const res: QuotesGetTotalRecordsQueryResult = await db
+      .select({ count: count() })
+      .from(quotes)
 
-    const totalRecords = res.rows[0].count
+    const totalRecordsData = res[0].count
 
     return Promise.resolve({
-      data: totalRecords,
+      data: totalRecordsData,
     })
   } catch (err: unknown) {
     return parseError(err)
@@ -77,20 +80,17 @@ export const getTotalRecords: ModelGetTotalRecords = async () => {
 
 export const getByPage: ModelGetByPage = async ({ limit, page }) => {
   try {
-    const res: QuotesGetByPageQueryResult = await pool.query(
-      `
-      SELECT * FROM quotes
-      ORDER BY id
-      LIMIT $1
-      OFFSET ($2 - 1) * $1;
-      `,
-      [limit, page]
-    )
+    const res: QuotesGetByPageQueryResult = await db
+      .select()
+      .from(quotes)
+      .orderBy(quotes.id)
+      .limit(limit)
+      .offset((page - 1) * limit)
 
-    const quotes = res.rows?.length ? res.rows : null
+    const quotesData = res.length ? res : null
 
     return Promise.resolve({
-      data: quotes,
+      data: quotesData,
     })
   } catch (err: unknown) {
     return parseError(err)
@@ -99,16 +99,12 @@ export const getByPage: ModelGetByPage = async ({ limit, page }) => {
 
 export const create: ModelCreate = async ({ author, text }) => {
   try {
-    const res: QuotesCreateQueryResult = await pool.query(
-      `
-      INSERT INTO quotes (author, text)
-      VALUES ($1, $2)
-      RETURNING id;
-      `,
-      [author, text]
-    )
+    const res: QuotesCreateQueryResult = await db
+      .insert(quotes)
+      .values({ author, text })
+      .returning({ insertedId: quotes.id })
 
-    const id = res.rows[0].id
+    const id = res[0]?.insertedId
 
     if (!id) {
       return Promise.reject(new ServiceError("Conflict"))
@@ -128,15 +124,12 @@ export const getById: ModelGetById = async ({ id }) => {
   }
 
   try {
-    const res: QuotesGetByIdQueryResult = await pool.query(
-      `
-      SELECT * FROM quotes
-      WHERE id = $1;
-      `,
-      [id]
-    )
+    const res: QuotesGetByIdQueryResult = await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.id, id))
 
-    const quote = res.rows?.length ? res.rows[0] : null
+    const quote = res.length ? res[0] : null
 
     return Promise.resolve({ data: quote })
   } catch (err: unknown) {
@@ -155,16 +148,12 @@ export const deleteById: ModelDeleteById = async ({ id }) => {
   }
 
   try {
-    const res: QuotesDeleteByIdQueryResult = await pool.query(
-      `
-      DELETE FROM quotes
-      WHERE id = $1
-      RETURNING *;
-      `,
-      [id]
-    )
+    const res: QuotesDeleteByIdQueryResult = await db
+      .delete(quotes)
+      .where(eq(quotes.id, id))
+      .returning({ deletedId: quotes.id })
 
-    const isDeleted = !!res.rowCount
+    const isDeleted = !!res[0]?.deletedId
 
     return Promise.resolve({ data: isDeleted })
   } catch (err: unknown) {
