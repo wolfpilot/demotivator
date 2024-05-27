@@ -1,33 +1,23 @@
-import { QueryResult } from "pg"
-
 // Types
 import { ModelResponse } from "@ts/api"
 import { QuoteData } from "@ts/data/quotes"
 
 // Queries
-export interface QuotesGetTotalRecordsQueryResult extends QueryResult {
-  rows: {
-    count: number
-  }[]
-}
+export type QuotesGetTotalRecordsQueryResult = {
+  count: number
+}[]
 
-export interface QuotesGetByPageQueryResult extends QueryResult {
-  rows: QuoteData[]
-}
+export type QuotesGetByPageQueryResult = QuoteData[]
 
-export interface QuotesCreateQueryResult extends QueryResult {
-  rows: {
-    id: number
-  }[]
-}
+export type QuotesCreateQueryResult = {
+  insertedId: number
+}[]
 
-export interface QuotesGetByIdQueryResult extends QueryResult {
-  rows: QuoteData[]
-}
+export type QuotesGetByIdQueryResult = QuoteData[]
 
-export interface QuotesDeleteByIdQueryResult extends QueryResult {
-  rows: QuoteData[]
-}
+export type QuotesDeleteByIdQueryResult = {
+  deletedId: number
+}[]
 
 // Responses
 export type QuotesGetTotalRecordsResponse = ModelResponse<number>

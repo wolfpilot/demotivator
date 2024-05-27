@@ -51,20 +51,21 @@ Postman
   - Request and error loggers with daily rotated files
   - Request body content type validation
   - Schema-based error validation
+  - Rate limited
 
 - Config
 
-  - Automated seeding from .sql files
+  - Automated seeding from SQL-like files
   - Import path aliases using tsconfig-paths
   - Localised .env files using dotenv-flow
 
 ## Features (TBA)
 
-- \[ ] Naughty SQL keyword detection (DROP TABLE, template0/1, etc.)
-- \[ ] Prepared statements (security)
-- \[ ] Request throttling (rate limitting, CAPTCHA)
-- \[ ] Response document pagination (cursor)
+- \[✔] Prepared statements (security)
+- \[✔] Request throttling (rate limitting, CAPTCHA)
+- \[✔] Response document pagination (cursor)
 - \[ ] Protected routes (not necessary atm.)
+- \[ ] Reversible test transactions (no-stress DB testing)
 
 ## Technologies
 
@@ -76,7 +77,8 @@ Postman
   - [Express](https://expressjs.com/)
 - Database
   - [PostgreSQL](https://www.postgresql.org/)
-  - Raw SQL (Knex considered)
+  - [Drizzle ORM](https://orm.drizzle.team/)
+  - Raw SQL
 - Config
   - [tsconfig-paths](https://www.npmjs.com/package/tsconfig-paths)
   - [dotenv-flow](https://www.npmjs.com/package/dotenv-flow)
@@ -85,6 +87,8 @@ Postman
   - [Prettier](https://prettier.io/)
 - Validation
   - [JSON Schema 7](https://json-schema.org/understanding-json-schema/)
+- Rate limiting
+  - [Express Rate Limit](https://github.com/express-rate-limit/express-rate-limit)
 - Testing
   - [Jest](https://jestjs.io/)
   - [SuperTest](https://www.npmjs.com/package/supertest)

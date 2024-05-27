@@ -1,5 +1,5 @@
 export interface QuoteData {
   id: number
-  author?: string
+  author: string | null
   text: string
 }
