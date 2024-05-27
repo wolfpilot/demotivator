@@ -12,6 +12,7 @@ const main = async () => {
       migrationsFolder: "src/database/migrations",
     })
 
+    // eslint-disable-next-line no-console
     console.log("Migration successful")
   } catch (err) {
     console.error(err)
