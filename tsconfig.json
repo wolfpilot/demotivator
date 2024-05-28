@@ -37,9 +37,8 @@
       "@mocks/*": ["src/mocks/*"],
       "@models/*": ["src/models/*"],
       "@routes/*": ["src/routes/*"],
-      "@schemas/*": ["src/schemas/*"],
       "@ts/*": ["src/types/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
     },
   },
   "exclude": [

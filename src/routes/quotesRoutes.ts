@@ -9,7 +9,7 @@ import {
   quotesGetByIdSchema,
   quotesCreateSchema,
   quotesDeleteByIdSchema,
-} from "@schemas/quotes/quotes.schema"
+} from "./schemas/quotes.schema"
 
 // Utils
 import { validate } from "@utils/validationHelper"
