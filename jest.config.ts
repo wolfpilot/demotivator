@@ -43,7 +43,6 @@ const config: Config.InitialOptions = {
     "^@mocks/(.*)$": resolve(__dirname, "./src/mocks/$1"),
     "^@models/(.*)$": resolve(__dirname, "./src/models/$1"),
     "^@routes/(.*)$": resolve(__dirname, "./src/routes/$1"),
-    "^@schemas/(.*)$": resolve(__dirname, "./src/schemas/$1"),
     "^@ts/(.*)$": resolve(__dirname, "./src/types/$1"),
     "^@utils/(.*)$": resolve(__dirname, "./src/utils/$1"),
   },
