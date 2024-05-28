@@ -22,16 +22,17 @@ A _mostly_ complete example of an Express server with PostgreSQL db and a bunch 
 
 _Why do today what you can put off until tomorrow?_
 
-It's a joke, of course, don't take it too seriously.
+It's a joke, of course, don't take it seriously.
 
 The whole idea behind this was to get my hands dirty with setting up APIs: best practices, scaling, maintenance and security vulnerabilities.
 
 ## Demo
 
-Endpoints
-
-- All quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes)
+- Default quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes)
+- Paginated quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2&page=3)
 - Single quote: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5](https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5)
+
+For more details and full CRUD examples, see [API](#api).
 
 Postman
 
@@ -61,11 +62,11 @@ Postman
 
 ## Features (TBA)
 
-- \[✔] Prepared statements (security)
-- \[✔] Request throttling (rate limitting, CAPTCHA)
-- \[✔] Response document pagination (cursor)
-- \[ ] Protected routes (not necessary atm.)
-- \[ ] Reversible test transactions (no-stress DB testing)
+- [x] Prepared statements (security)
+- [x] Request throttling (rate limitting, CAPTCHA)
+- [x] Response document pagination (cursor)
+- [ ] Protected routes (not necessary atm.)
+- [ ] Reversible test transactions (no-stress DB testing)
 
 ## Technologies
 
