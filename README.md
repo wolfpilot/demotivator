@@ -150,7 +150,7 @@ Query params:
 
 #### Get a specific quote
 
-- POST /quotes
+- GET /quotes
 
 ```bash
 curl \
@@ -160,7 +160,7 @@ curl \
 
 #### Create a new quote
 
-- GET /quotes/:id
+- POST /quotes/:id
 
 ```bash
 curl \
