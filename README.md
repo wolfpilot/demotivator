@@ -28,9 +28,9 @@ The whole idea behind this was to get my hands dirty with setting up APIs: best 
 
 ## Demo
 
-- Default quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes)
-- Paginated quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2&page=3)
-- Single quote: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5](https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5)
+- Default quotes: [https://wolfpilot-demotivator-rest-api.vercel.app/quotes](https://wolfpilot-demotivator-rest-api.vercel.app/quotes)
+- Paginated quotes: [https://wolfpilot-demotivator-rest-api.vercel.app/quotes?limit=2&page=3](https://wolfpilot-demotivator-rest-api.vercel.app/quotes?limit=2&page=3)
+- Single quote: [https://wolfpilot-demotivator-rest-api.vercel.app/quotes/5](https://wolfpilot-demotivator-rest-api.vercel.app/quotes/5)
 
 For more details and full CRUD examples, see [API](#api).
 
@@ -100,12 +100,12 @@ Postman
   - [Husky](https://www.npmjs.com/package/husky)
     - Pre-commit
     - Pre-push
-  - [Render](https://www.render.com/)
+  - [Vercel](https://vercel.com/)
     - Hosting server and DB
 
 ## API
 
-Either start your own server and visit [http://localhost:9000](http://localhost:9000) or [https://wolfpilot-demotivator-rest-api.onrender.com](https://wolfpilot-demotivator-rest-api.onrender.com).
+Either start your own server and visit [http://localhost:9000](http://localhost:9000) or [https://wolfpilot-demotivator-rest-api.vercel.app](https://wolfpilot-demotivator-rest-api.vercel.app).
 
 ### Endpoints
 
@@ -133,7 +133,7 @@ If running locally, please use "http://localhost:9000" instead. Alternatively, i
 curl \
   -H "Content-Type: application/json" \
   -X GET \
-  https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2\&page=4
+  https://wolfpilot-demotivator-rest-api.vercel.app/quotes?limit=2\&page=4
 
 Query params:
   limit
@@ -155,7 +155,7 @@ Query params:
 ```bash
 curl \
   -X GET \
-  https://wolfpilot-demotivator-rest-api.onrender.com/quotes/3
+  https://wolfpilot-demotivator-rest-api.vercel.app/quotes/3
 ```
 
 #### Create a new quote
@@ -170,7 +170,7 @@ curl \
     "author": "Steven Wright",
     "text": "The light at the end of the tunnel has been turned off due to budget cuts."
   }' \
-  https://wolfpilot-demotivator-rest-api.onrender.com/quotes
+  https://wolfpilot-demotivator-rest-api.vercel.app/quotes
 
 Body:
   # The author of the quote.
@@ -188,7 +188,7 @@ Body:
 ```bash
 curl \
   -X DELETE \
-  https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5
+  https://wolfpilot-demotivator-rest-api.vercel.app/quotes/5
 ```
 
 ## Security
