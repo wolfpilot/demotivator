@@ -29,7 +29,7 @@ The whole idea behind this was to get my hands dirty with setting up APIs: best 
 ## Demo
 
 - Default quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes)
-- Paginated quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes](https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2&page=3)
+- Paginated quotes: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2&page=3](https://wolfpilot-demotivator-rest-api.onrender.com/quotes?limit=2&page=3)
 - Single quote: [https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5](https://wolfpilot-demotivator-rest-api.onrender.com/quotes/5)
 
 For more details and full CRUD examples, see [API](#api).
