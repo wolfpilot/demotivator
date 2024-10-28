@@ -4,7 +4,7 @@ import { Options, rateLimit } from "express-rate-limit"
 import { isRenderHost } from "@utils/envHelper"
 
 const TIME_WINDOW_IN_MINUTES = 1
-const MAX_REQUESTS_PER_WINDOW = 10
+const MAX_REQUESTS_PER_WINDOW = 100
 
 const config: Partial<Options> = {
   skip: () => !isRenderHost, // Disable during dev and test
